@@ -3,47 +3,54 @@
 
 import React from 'react';
 
-interface ErrorBoundaryState {
+interface Props {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error?: Error }>;
+}
+
+interface State {
   hasError: boolean;
   error?: Error;
 }
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error: Error }>;
-}
-
-class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
+class ErrorBoundary extends React.Component<Props, State> {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    // Log error for admin/debugging purposes only
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error caught by boundary:', error, errorInfo);
+    }
   }
 
   render() {
     if (this.state.hasError) {
       if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback;
-        return <FallbackComponent error={this.state.error!} />;
+        const Fallback = this.props.fallback;
+        return <Fallback error={this.state.error} />;
       }
 
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <h2 className="text-xl font-semibold text-red-600 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-4">An error occurred while rendering this component.</p>
-          <button 
-            onClick={() => this.setState({ hasError: false })}
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Try again
-          </button>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-background text-center p-4">
+          <div className="max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Oops! Something went wrong</h2>
+            <p className="text-muted-foreground mb-6">
+              Maya seems to be having a little technical hiccup. Don't worry, she'll be back soon! 💕
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="bg-primary text-primary-foreground px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         </div>
       );
     }

@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Camera, X as XIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import type { AdminStatusDisplay, ManagedContactStatus, AdSettings, AIProfile } from '@/types';
-import { defaultAIProfile, defaultAdminStatusDisplay, defaultManagedContactStatuses } from '@/config/ai';
+import { defaultAIProfile, adminStatusConfig, managedContactsConfig } from '@/config/ai';
 import { tryShowRotatedAd } from '@/app/maya-chat/page';
 import { useAIProfile } from '@/contexts/AIProfileContext';
 import { useGlobalStatus } from '@/contexts/GlobalStatusContext';
@@ -210,8 +210,8 @@ const StatusPage: React.FC = () => {
   const { toast } = useToast();
 
   const effectiveAIProfile = globalAIProfile || defaultAIProfile;
-  const displayAdminOwnStatus = globalAdminOwnStatus || defaultAdminStatusDisplay;
-  const displayManagedDemoContacts = globalManagedDemoContacts || defaultManagedContactStatuses;
+  const displayAdminOwnStatus = globalAdminOwnStatus || adminStatusConfig;
+  const displayManagedDemoContacts = globalManagedDemoContacts || managedContactsConfig;
 
   if (isLoadingAIProfile || isLoadingGlobalStatuses || isLoadingAdSettings) {
      return (

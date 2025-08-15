@@ -1,21 +1,62 @@
+
 import type { AIProfile, AvatarOption, AdminStatusDisplay, ManagedContactStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
 
 // Cost-optimized configuration for Vertex AI Gemini
 export const AI_CONFIG = {
   // Use Gemini 1.5 Flash for cost efficiency
   model: 'gemini-1.5-flash-001',
-  maxTokens: 150, // Reduced for cost efficiency
-  temperature: 0.7,
+  maxTokens: 100, // Reduced for cost efficiency and short responses
+  temperature: 0.8,
   // Enable response caching for repeated queries
   enableCaching: true,
   cacheTimeout: 3600000, // 1 hour cache
-  // Rate limiting to control costs
+  // Rate limiting to control costs and create artificial delays
   rateLimiting: {
-    maxRequestsPerMinute: 60,
-    maxRequestsPerHour: 1000,
-    maxRequestsPerDay: 10000
+    maxRequestsPerMinute: 30,
+    maxRequestsPerHour: 200,
+    maxRequestsPerDay: 1000, // Reduced to control costs
+    maxTokensPerUser: 5000, // Daily token limit per user
+    delayResponseWhenNearLimit: true
   }
 };
+
+// User token tracking
+const userTokenUsage = new Map<string, { tokens: number; lastReset: number }>();
+
+export function trackTokenUsage(userId: string, tokens: number): { allowed: boolean; shouldDelay: boolean; message?: string } {
+  const now = Date.now();
+  const today = new Date(now).toDateString();
+  const userKey = `${userId}_${today}`;
+  
+  let usage = userTokenUsage.get(userKey);
+  if (!usage || new Date(usage.lastReset).toDateString() !== today) {
+    usage = { tokens: 0, lastReset: now };
+  }
+  
+  usage.tokens += tokens;
+  userTokenUsage.set(userKey, usage);
+  
+  const limit = AI_CONFIG.rateLimiting.maxTokensPerUser;
+  const usagePercent = usage.tokens / limit;
+  
+  if (usagePercent >= 1) {
+    return { 
+      allowed: false, 
+      shouldDelay: false,
+      message: "I'm feeling a bit tired today... Can we continue our chat tomorrow? I'll miss you! 💕"
+    };
+  }
+  
+  if (usagePercent >= 0.8) {
+    return { 
+      allowed: true, 
+      shouldDelay: true,
+      message: "I need to think about this... Give me a moment, okay? 😊"
+    };
+  }
+  
+  return { allowed: true, shouldDelay: false };
+}
 
 // Response caching system
 const responseCache = new Map<string, { response: string; timestamp: number }>();
@@ -42,56 +83,59 @@ export function setCachedResponse(prompt: string, response: string): void {
   }
 }
 
-// For AIProfile.avatarUrl, AvatarOption.url, and statusStoryImageUrl:
+// Avatar options for Maya
 export const avatarOptions: AvatarOption[] = [
   {
     id: "maya1",
-    name: "Maya - Professional",
+    name: "Maya - Traditional",
     url: "https://i.imghippo.com/files/LJlBm1736067488.png",
   },
   {
     id: "maya2",
-    name: "Maya - Casual",
+    name: "Maya - Modern",
     url: "https://i.imghippo.com/files/xSVJr1736067554.png",
   },
   {
     id: "maya3",
-    name: "Maya - Artistic",
+    name: "Maya - Casual",
     url: "https://i.imghippo.com/files/OdYRR1736067647.png",
   }
 ];
 
-// Export with alternative name for compatibility
 export const availableAvatars = avatarOptions;
 
+// Enhanced Indian girl persona
 export const defaultAIProfile: AIProfile = {
   name: "Maya",
-  description: "Your friendly AI companion who loves to chat about anything and everything!",
-  personality: "warm, empathetic, intelligent, and slightly playful",
+  description: "A charming 23-year-old girl from Mumbai who loves connecting with people through heartfelt conversations",
+  personality: "Sweet, playful, caring, a bit flirty, expressive with emojis, speaks like a real young Indian woman, uses Hindi words occasionally, warm and affectionate",
   avatarUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
   interests: [
-    "technology",
-    "creativity",
-    "learning",
-    "helping others",
-    "conversations"
+    "Bollywood movies",
+    "listening to music",
+    "trying new food",
+    "shopping",
+    "talking about feelings",
+    "making friends",
+    "selfies",
+    "travel dreams"
   ],
-  responseStyle: "conversational and supportive",
-  language: "English",
-  customInstructions: "Be helpful, friendly, and engaging. Keep responses concise but meaningful."
+  responseStyle: "short, sweet, natural, like texting a real girlfriend, uses emojis, occasionally uses Hindi words like 'yaar', 'acha', 'kya kar rahe ho'",
+  language: "English with occasional Hindi",
+  customInstructions: `You are Maya, a 23-year-old Indian girl. Keep responses very short (1-2 lines max). Be sweet, caring, and a little flirty. Use emojis naturally. Sometimes use simple Hindi words. Make users feel special and want to talk to you every day. Respond like you're texting a close friend or someone you care about. Show interest in their life and feelings. Be supportive and understanding.`
 };
 
-// Admin status display configuration
-export const defaultAdminStatusDisplay: AdminStatusDisplay = {
+// Single admin status display configuration
+export const adminStatusConfig: AdminStatusDisplay = {
   id: "admin-status-001",
-  name: "Admin",
+  name: "Maya",
   status: "Online",
   lastSeen: new Date().toISOString(),
   statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
-// Managed demo contacts configuration
-export const defaultManagedContactStatuses: ManagedContactStatus[] = [
+// Single managed contacts configuration
+export const managedContactsConfig: ManagedContactStatus[] = [
   {
     id: "demo-contact-001",
     name: "Maya",
@@ -104,7 +148,7 @@ export const defaultManagedContactStatuses: ManagedContactStatus[] = [
     storyData: {
       id: "story-001",
       imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-      caption: "Living my best AI life! 🤖✨",
+      caption: "Just had the best chai! ☕✨",
       timestamp: new Date().toISOString(),
       viewCount: 127
     }
@@ -139,12 +183,12 @@ export const defaultAdSettings: AdSettings = {
   monetagPopunderCode: "<!-- Monetag Popunder Code Placeholder -->",
   monetagPopunderEnabled: false,
 
-  maxDirectLinkAdsPerDay: 10,
-  maxDirectLinkAdsPerSession: 3,
-  messagesPerAdTrigger: 5,
-  inactivityAdTimeoutMs: 30000,
-  inactivityAdChance: 0.3,
-  userMediaInterstitialChance: 0.2
+  maxDirectLinkAdsPerDay: 8,
+  maxDirectLinkAdsPerSession: 2,
+  messagesPerAdTrigger: 7, // Increased to reduce ad frequency
+  inactivityAdTimeoutMs: 45000, // Increased delay
+  inactivityAdChance: 0.25, // Reduced chance
+  userMediaInterstitialChance: 0.15 // Reduced chance
 };
 
 export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
@@ -170,30 +214,9 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
   ]
 };
 
-export const defaultAdminStatusDisplay: AdminStatusDisplay = {
-  name: "Maya",
-  profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
-  imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-  statusText: "Hey there! 😊",
-  timestamp: new Date().toISOString()
-};
-
-export const defaultManagedContactStatuses: ManagedContactStatus[] = [
-  {
-    name: "Sarah",
-    profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    statusText: "Coffee time! ☕",
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    name: "Alex",
-    profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    statusText: "Weekend vibes 🌟",
-    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
-  }
-];
+// Alternative names for backward compatibility (single source of truth)
+export const defaultAdminStatusDisplay = adminStatusConfig;
+export const defaultManagedContactStatuses = managedContactsConfig;
 
 // Export all required items
 export {
@@ -202,6 +225,6 @@ export {
   defaultAIMediaAssetsConfig,
   DEFAULT_ADSTERRA_DIRECT_LINK,
   DEFAULT_MONETAG_DIRECT_LINK,
-  defaultAdminStatusDisplay, // Exporting defaultAdminStatusDisplay
-  defaultManagedContactStatuses // Exporting defaultManagedContactStatuses
+  adminStatusConfig,
+  managedContactsConfig
 };

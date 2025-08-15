@@ -7,7 +7,7 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatView from '@/components/chat/ChatView';
 import ChatInput from '@/components/chat/ChatInput';
 import type { Message, AIProfile, MessageStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
-import { defaultAIProfile, defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK } from '@/config/ai';
+import { defaultAIProfile, defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, AI_CONFIG, trackTokenUsage } from '@/config/ai';
 import { generateResponse, type EmotionalStateInput, type EmotionalStateOutput } from '@/ai/flows/emotional-state-simulation';
 import { generateOfflineMessage, type OfflineMessageInput } from '@/ai/flows/offline-message-generation';
 import { useToast } from "@/hooks/use-toast";
@@ -32,7 +32,7 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
   "Hmm... kuch to gadbad hai. Thoda intezaar karo, fir se try karte hain.",
   "Mujhe lag raha hai server thoda mood mein nahi hai. Dubara bhejoge kya?",
   "Arre baap re! Signal hi nahi mil raha. Ek second ruk ja bhai.",
-  
+
   // More engaging fallbacks
   "Oops! My brain just went offline for a sec 🤪 Try again?",
   "Arre! Mera wifi thoda dramatic ho gaya. One more time?",
@@ -548,14 +548,72 @@ const KruthikaChatPage: NextPage = () => {
       const hasAvailableImages = availableImages.length > 0;
       const hasAvailableAudio = availableAudio.length > 0;
 
+      // Generate user ID (in production, use proper user authentication)
+      const userId = 'user_' + (typeof window !== 'undefined' ? (localStorage.getItem('userId') || Math.random().toString(36).substr(2, 9)) : 'anonymous');
+      if (typeof window !== 'undefined' && !localStorage.getItem('userId')) {
+        localStorage.setItem('userId', userId);
+      }
+
+      // Enhanced prompt for realistic Indian girl persona
+      const prompt = `You are Maya, a sweet 23-year-old Indian girl from Mumbai. You're chatting with someone you really care about.
+
+Key traits:
+- Keep responses very short (max 1-2 lines)
+- Be sweet, caring, and slightly flirty
+- Use emojis naturally 😊💕
+- Sometimes use Hindi words like "yaar", "acha", "kya kar rahe ho"
+- Show genuine interest in their feelings
+- Make them feel special and wanted
+- Respond like you're texting a close friend or someone you have feelings for
+
+User's message: ${text}
+
+Reply as Maya would - short, sweet, and loving:`;
+
+
+      // Check token usage first
+      const tokenCheck = trackTokenUsage(userId, AI_CONFIG.maxTokens);
+
+      if (!tokenCheck.allowed) {
+        const limitMessage: Message = {
+          id: Date.now().toString(), // Use a unique ID for new messages
+          text: tokenCheck.message || "I'm feeling tired... let's chat tomorrow! 💕",
+          sender: 'ai',
+          timestamp: new Date(),
+          status: 'read',
+        };
+        setMessages(prev => [...prev, limitMessage]);
+        setIsAiTyping(false);
+        return;
+      }
+
+      // Add delay if approaching limit to create anticipation
+      if (tokenCheck.shouldDelay) {
+        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
+      }
+
+      const cachedResponse = getCachedResponse(prompt);
+      if (cachedResponse) {
+        const aiMessage: Message = {
+          id: Date.now().toString(), // Use a unique ID for new messages
+          text: cachedResponse,
+          sender: 'ai',
+          timestamp: new Date(),
+          status: 'read',
+        };
+        setMessages(prev => [...prev, aiMessage]);
+        setIsAiTyping(false);
+        return;
+      }
+
       const aiInput: EmotionalStateInput = {
         userMessage: text,
         userImageUri: currentImageUri,
         timeOfDay: getTimeOfDay(),
         mood: aiMood,
         recentInteractions: updatedRecentInteractions,
- hasAvailableImages: hasAvailableImages,
- hasAvailableAudio: hasAvailableAudio,
+        hasAvailableImages: hasAvailableImages,
+        hasAvailableAudio: hasAvailableAudio,
         detailedPersonaPrompt: detailedPersonaPrompt,
       };
 
@@ -728,7 +786,8 @@ const KruthikaChatPage: NextPage = () => {
 
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
     const lastInteractionTime = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
-    const timeSinceLastInteraction = now - lastInteractionTime;
+    const currentTimestamp = Date.now();
+    const timeSinceLastInteraction = currentTimestamp - lastInteractionTime;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
     if (messages.some(m => m.sender === 'user') && lastMessage && lastMessage.sender === 'user' && timeSinceLastInteraction > 2 * 60 * 60 * 1000 && Math.random() < 0.3) {
@@ -747,7 +806,7 @@ const KruthikaChatPage: NextPage = () => {
           const offlineResult = await generateOfflineMessage(offlineInput);
           const typingDelay = Math.min(Math.max(offlineResult.message.length * 60, 700), 3500);
           await new Promise(resolve => setTimeout(resolve, typingDelay));
-          const newOfflineMsgId = (currentTime + Math.random()).toString();
+          const newOfflineMsgId = (currentTimestamp + Math.random()).toString();
           const offlineMessage: Message = {
             id: newOfflineMsgId,
             text: offlineResult.message,
@@ -757,7 +816,7 @@ const KruthikaChatPage: NextPage = () => {
           };
           setMessages(prev => [...prev, offlineMessage]);
           // Cache the newly generated offline message
-      const newCachedMessage = { message: offlineResult.message, timestamp: now };
+      const newCachedMessage = { message: offlineResult.message, timestamp: currentTimestamp };
       setCachedOfflineMessage(newCachedMessage);
       localStorage.setItem(CACHED_OFFLINE_MESSAGE_KEY, JSON.stringify(newCachedMessage));
       console.log("Generated and cached new offline message.");
