@@ -1,56 +1,41 @@
-
-// src/app/api/test-db/route.ts
-// NOTE: This endpoint is configured for testing Firestore connectivity.
-// If the project's primary database is Supabase (as suggested by other files),
-// this file is likely unnecessary and should be removed, or converted to test Supabase instead.
-
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/firebase'; // Our initialized Firestore instance
-import { collection, getDocs, limit } from 'firebase/firestore';
+import { supabase } from '@/lib/supabaseClient';
 
 export async function GET() {
-  // This is a simple test to try and read from Firestore.
-  // For this to work, you need:
-  // 1. A Firebase project with Firestore enabled.
-  // 2. Your Firebase config keys in .env.local (or environment variables).
-  // 3. Firestore security rules that allow reads (e.g., allow read: if true; for testing ONLY).
-
   try {
-    // Try to get a list of collections as a basic test.
-    // Or, try to read a few documents from a known collection if you have one.
-    // Example: Get 1 document from a 'users' collection (replace 'users' with your collection name)
-    // const usersCol = collection(db, 'users');
-    // const q = query(usersCol, limit(1));
-    // const userSnapshot = await getDocs(q);
+    // Test Supabase connection
+    const { data, error } = await supabase
+      .from('messages_log')
+      .select('count(*)')
+      .limit(1);
 
-    // For a more generic test, let's try listing collections.
-    // Firestore doesn't have a direct "list collections" client-side API for security reasons.
-    // So, let's try to read from a hypothetical 'test_collection'.
-    // You would need to create this collection and add a document in your Firestore console for this to succeed.
-    
-    const testColRef = collection(db, '_internal_test_collection_do_not_use_for_prod'); // A dummy collection
-    const querySnapshot = await getDocs(limit(testColRef, 1));
-    
-    if (!querySnapshot.empty) {
-      return NextResponse.json({ 
-        message: 'Successfully connected to Firestore and read a document.',
-        documentId: querySnapshot.docs[0].id
-      });
-    } else {
-       return NextResponse.json({ 
-        message: 'Connected to Firestore, but the test collection is empty or does not exist. Please create a collection named "_internal_test_collection_do_not_use_for_prod" with at least one document in your Firestore console for a successful read test.',
-      });
+    if (error) {
+      console.error("Supabase connection test error:", error);
+      return NextResponse.json(
+        { 
+          message: 'Failed to connect to Supabase or read data.', 
+          error: error.message,
+          details: "Ensure your Supabase project is set up, environment variables are correct in .env.local, and RLS policies are configured properly."
+        }, 
+        { status: 500 }
+      );
     }
 
+    return NextResponse.json({
+      message: 'Successfully connected to Supabase!',
+      timestamp: new Date().toISOString(),
+      data: data
+    });
+
   } catch (error: any) {
-    console.error("Firestore connection test error:", error);
+    console.error("Supabase connection test error:", error);
     return NextResponse.json(
       { 
-        message: 'Failed to connect to Firestore or read data.', 
+        message: 'Failed to connect to Supabase or read data.', 
         error: error.message,
-        details: "Ensure your Firebase project is set up, Firestore is enabled, environment variables (NEXT_PUBLIC_FIREBASE_...) are correct in .env.local, and Firestore security rules allow access."
+        details: "Ensure your Supabase project is set up, environment variables are correct in .env.local, and RLS policies are configured properly."
       }, 
-      { status: 500 } // Fixed missing closing parenthesis
+      { status: 500 }
     );
   }
 }

@@ -1,85 +1,129 @@
 
 import type { AIProfile, AvatarOption, AdminStatusDisplay, ManagedContactStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
 
+// Cost-optimized configuration for Vertex AI Gemini
+export const AI_CONFIG = {
+  // Use Gemini 1.5 Flash for cost efficiency
+  model: 'gemini-1.5-flash-001',
+  maxTokens: 150, // Reduced for cost efficiency
+  temperature: 0.7,
+  // Enable response caching for repeated queries
+  enableCaching: true,
+  cacheTimeout: 3600000, // 1 hour cache
+  // Rate limiting to control costs
+  rateLimiting: {
+    maxRequestsPerMinute: 60,
+    maxRequestsPerHour: 1000,
+    maxRequestsPerDay: 10000
+  }
+};
+
+// Response caching system
+const responseCache = new Map<string, { response: string; timestamp: number }>();
+
+export function getCachedResponse(prompt: string): string | null {
+  const cached = responseCache.get(prompt);
+  if (cached && Date.now() - cached.timestamp < AI_CONFIG.cacheTimeout) {
+    return cached.response;
+  }
+  return null;
+}
+
+export function setCachedResponse(prompt: string, response: string): void {
+  responseCache.set(prompt, { response, timestamp: Date.now() });
+  
+  // Clean old cache entries to prevent memory bloat
+  if (responseCache.size > 1000) {
+    const entries = Array.from(responseCache.entries());
+    entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
+    // Remove oldest 200 entries
+    for (let i = 0; i < 200; i++) {
+      responseCache.delete(entries[i][0]);
+    }
+  }
+}
+
 // For AIProfile.avatarUrl, AvatarOption.url, and statusStoryImageUrl:
-// These should be URLs to publicly hosted images.
-
-export const defaultAIProfile: AIProfile = {
-  name: 'Kruthika',
-  avatarUrl: 'https://placehold.co/100x100.png/E91E63/FFFFFF?text=K',
-  status: '🌸 Living my best life! Let\'s chat! 🌸',
-  statusStoryText: 'Ask me anything! 💬',
-  statusStoryImageUrl: undefined,
-  statusStoryHasUpdate: true,
-};
-
-export const defaultAdminStatusDisplay: AdminStatusDisplay = {
-  id: "admin-own-status",
-  name: "My Status",
-  avatarUrl: "https://placehold.co/100x100.png/757575/FFFFFF?text=A",
-  statusText: "Tap to update from Admin Panel!",
-  statusImageUrl: undefined,
-  hasUpdate: false,
-};
-
-export const defaultManagedContactStatuses: ManagedContactStatus[] = [
-  { id: "demo1", name: "Ananya ✨", avatarUrl: "https://placehold.co/100x100.png/FF9800/FFFFFF?text=A", statusText: "10 minutes ago", hasUpdate: true, dataAiHint: "profile woman", statusImageUrl: undefined },
-  { id: "demo2", name: "Priya 💖", avatarUrl: "https://placehold.co/100x100.png/4CAF50/FFFFFF?text=P", statusText: "Wow, new pic! 📸", hasUpdate: true, dataAiHint: "girl fashion", statusImageUrl: "https://placehold.co/300x500.png/4CAF50/FFFFFF?text=Priya%27s+Story" },
-  { id: "demo3", name: "Sneha 😊", avatarUrl: "https://placehold.co/100x100.png/03A9F4/FFFFFF?text=S", statusText: "Seen 2 hours ago", hasUpdate: false, dataAiHint: "female portrait", statusImageUrl: undefined },
+export const avatarOptions: AvatarOption[] = [
+  {
+    id: "maya1",
+    name: "Maya - Professional",
+    url: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  },
+  {
+    id: "maya2", 
+    name: "Maya - Casual",
+    url: "https://i.imghippo.com/files/xSVJr1736067554.png",
+  },
+  {
+    id: "maya3",
+    name: "Maya - Artistic", 
+    url: "https://i.imghippo.com/files/OdYRR1736067647.png",
+  }
 ];
 
-export const DEFAULT_ADSTERRA_DIRECT_LINK = "https://judicialphilosophical.com/zd46rhxy0?key=3dad0e700ddba4c8c8ace4396dd31e8a";
-export const DEFAULT_MONETAG_DIRECT_LINK = "https://otieu.com/4/9403276";
+export const defaultAIProfile: AIProfile = {
+  name: "Maya",
+  description: "Your friendly AI companion who loves to chat about anything and everything!",
+  personality: "warm, empathetic, intelligent, and slightly playful",
+  avatarUrl: avatarOptions[0].url,
+  interests: ["technology", "creativity", "learning", "helping others", "conversations"],
+  responseStyle: "conversational and supportive",
+  language: "English",
+  customInstructions: "Be helpful, friendly, and engaging. Keep responses concise but meaningful.",
+};
+
+export const adminStatusDisplaySettings: AdminStatusDisplay = {
+  showOnHomepage: true,
+  showInChat: true,
+  enableStatusStory: true,
+  statusStoryImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  statusStoryText: "Currently online and ready to chat! 💬✨",
+};
+
+export const managedContactStatus: ManagedContactStatus = {
+  isOnline: true,
+  lastSeen: new Date().toISOString(),
+  customStatusMessage: "Always here to help! 🌟",
+  showLastSeen: true,
+  showCustomStatus: true,
+};
+
+const DEFAULT_ADSTERRA_DIRECT_LINK = "https://www.profitablecpmnetwork.com/g8nhym4yg?key=2b71bf819cb8c5c7f8e011b7b75ea097";
 
 export const defaultAdSettings: AdSettings = {
   adsEnabledGlobally: true,
-  
+
   adsterraDirectLink: DEFAULT_ADSTERRA_DIRECT_LINK,
-  adsterraDirectLinkEnabled: true, // REMINDER: Replace with your actual Adsterra Direct Link
-  adsterraBannerCode: "<!-- Adsterra Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Banner Code
-  adsterraBannerEnabled: false, 
-  adsterraNativeBannerCode: "<!-- Adsterra Native Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Native Banner Code
+  adsterraDirectLinkEnabled: true,
+  adsterraBannerCode: "<!-- Adsterra Banner Code Placeholder -->",
+  adsterraBannerEnabled: false,
+  adsterraNativeBannerCode: "<!-- Adsterra Native Banner Code Placeholder -->",
   adsterraNativeBannerEnabled: false,
-  adsterraSocialBarCode: "<!-- Adsterra Social Bar Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Social Bar Code
-  adsterraSocialBarEnabled: false,
-  adsterraPopunderCode: "<!-- Adsterra Pop-under Script Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Pop-under Code
-  adsterraPopunderEnabled: false,
-
-  monetagDirectLink: DEFAULT_MONETAG_DIRECT_LINK,
-  monetagDirectLinkEnabled: true, // REMINDER: Replace with your actual Monetag Direct Link
-  monetagBannerCode: "<!-- Monetag Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Banner Code
-  monetagBannerEnabled: false,
-  monetagNativeBannerCode: "<!-- Monetag Native Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Native Banner Code
-  monetagNativeBannerEnabled: false,
-  monetagSocialBarCode: "<!-- Monetag Social Bar Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Social Bar Code
-  monetagSocialBarEnabled: false,
-  monetagPopunderCode: "<!-- Monetag Pop-under Script Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Pop-under Code
-  monetagPopunderEnabled: false,
-
-  maxDirectLinkAdsPerDay: 6, // Default based on our previous discussion
-  maxDirectLinkAdsPerSession: 3, // Default based on our previous discussion
-  inactivityAdTimeoutMs: 60000, // Added default value (1 minute)
-  inactivityAdChance: 0.2, // Added default value (20%)
-  userMediaInterstitialChance: 0.3, // Added default value (30%)
+  adsterraSocialBarCode: "<!-- Adsterra Social Bar Code Placeholder -->",
+  adsterraSocialBarEnabled: true,
 };
 
-// Default configuration for AI's sharable media assets.
-// Images: URLs must be publicly accessible.
-// REMINDER: Populate the 'assets' array with actual media URLs/paths for the AI to share.
-// Audio: Place files in `public/media/` and use paths like '/media/filename.mp3'.
 export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
-  assets: [
-    // { id: 'img1', type: 'image', url: 'https://placehold.co/600x400.png/FFEB3B/000000?text=My+Sunny+Selfie!', description: 'AI Selfie Example' },
-    // { id: 'img2', type: 'image', url: 'https://placehold.co/600x400.png/8BC34A/FFFFFF?text=Beautiful+View!', description: 'AI Scenery Example' },
-    // { id: 'audio1', type: 'audio', url: '/media/example_laugh.mp3', description: 'AI Laugh Example (place in public/media)' },
-  ],
+  // Audio assets
+  messageSentSoundEnabled: true,
+  messageReceivedSoundEnabled: true,
+  messageSentSoundUrl: "/media/message-sent.mp3",
+  messageReceivedSoundUrl: "/media/message-received.mp3",
+  
+  // Visual assets
+  chatBackgroundImageEnabled: false,
+  chatBackgroundImageUrl: "/chat-bg.png",
+  customEmojiEnabled: false,
+  customEmojiSetUrl: "",
+  
+  // Animation settings
+  enableTypingAnimation: true,
+  enableMessageAnimations: true,
+  animationSpeed: "normal",
+  
+  // Theme settings
+  darkModeEnabled: true,
+  primaryColor: "#3b82f6",
+  accentColor: "#10b981",
 };
-
-// This is kept for legacy avatar picker if ever re-enabled, but not used for Kruthika's profile avatar anymore.
-export const availableAvatars: AvatarOption[] = [
-  { id: 'avatar1', url: 'https://placehold.co/100x100.png/FFC107/000000?text=K1', aiHint: 'woman illustration' },
-  { id: 'avatar2', url: 'https://placehold.co/100x100.png/4CAF50/FFFFFF?text=K2', aiHint: 'girl avatar' },
-  { id: 'avatar3', url: 'https://placehold.co/100x100.png/2196F3/FFFFFF?text=K3', aiHint: 'female icon' },
-  { id: 'avatar4', url: 'https://placehold.co/100x100.png/9C27B0/FFFFFF?text=K4', aiHint: 'woman face' },
-  { id: 'avatar5', url: 'https://placehold.co/100x100.png/795548/FFFFFF?text=K5', aiHint: 'person silhouette' },
-];
