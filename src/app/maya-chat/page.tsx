@@ -920,8 +920,17 @@ Reply as Maya would - short, sweet, and loving:`;
 
   const displayAIProfile = globalAIProfile || defaultAIProfile;
 
-  if (isLoadingAIProfile || !globalAIProfile || isLoadingAdSettings || isLoadingMediaAssets || isLoadingChatState ) {
-    return <div className="flex justify-center items-center h-screen bg-chat-bg-default text-foreground">Loading Kruthika's Chat...</div>;
+  if (isLoadingAIProfile || isLoadingAdSettings || isLoadingMediaAssets || isLoadingChatState) {
+    return (
+      <div className="flex flex-col h-screen max-w-3xl mx-auto bg-chat-bg-default shadow-2xl">
+        <div className="flex justify-center items-center h-screen text-foreground">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+            <p>Loading Kruthika's Chat...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
