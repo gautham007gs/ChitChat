@@ -68,55 +68,46 @@ export const defaultAIProfile: AIProfile = {
   name: "Maya",
   description: "Your friendly AI companion who loves to chat about anything and everything!",
   personality: "warm, empathetic, intelligent, and slightly playful",
-  avatarUrl: avatarOptions[0].url,
-  interests: ["technology", "creativity", "learning", "helping others", "conversations"],
+  avatarUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  interests: [
+    "technology",
+    "creativity",
+    "learning",
+    "helping others",
+    "conversations"
+  ],
   responseStyle: "conversational and supportive",
   language: "English",
-  customInstructions: "Be helpful, friendly, and engaging. Keep responses concise but meaningful.",
+  customInstructions: "Be helpful, friendly, and engaging. Keep responses concise but meaningful."
 };
 
-// Admin status display configuration - must be exported for GlobalStatusContext
+// Admin status display configuration
 export const defaultAdminStatusDisplay: AdminStatusDisplay = {
   id: "admin-status-001",
   name: "Admin",
-  status: "Building something amazing! 🚀",
-  statusStoryText: "Hey everyone! I'm currently working on some exciting new features for our platform. Stay tuned for updates!",
-  statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
-};
-
-export const managedContactStatus: ManagedContactStatus = {
-  isOnline: true,
+  status: "Online",
   lastSeen: new Date().toISOString(),
-  customStatusMessage: "Always here to help! 🌟",
-  showLastSeen: true,
-  showCustomStatus: true,
+  statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
 // Managed demo contacts configuration
 export const defaultManagedContactStatuses: ManagedContactStatus[] = [
   {
     id: "demo-contact-001",
-    name: "Demo User 1",
-    status: "Available for chat! 💬",
-    statusStoryText: "Just finished an amazing workout session! Feeling energized and ready to tackle the day.",
-    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    statusStoryHasUpdate: true
-  },
-  {
-    id: "demo-contact-002",
-    name: "Demo User 2",
-    status: "Working from home today 🏠",
-    statusStoryText: "Another productive day working remotely. Love the flexibility!",
-    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    statusStoryHasUpdate: false
-  },
-  {
-    id: "demo-contact-003",
-    name: "Demo User 3",
-    status: "Coffee break ☕",
-    statusStoryText: "Taking a well-deserved coffee break. The perfect fuel for creativity!",
-    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-    statusStoryHasUpdate: true
+    name: "Maya",
+    status: "Active now",
+    lastSeen: new Date().toISOString(),
+    avatarUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    isOnline: true,
+    hasStory: true,
+    hasNewStory: false,
+    storyData: {
+      id: "story-001",
+      imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+      caption: "Living my best AI life! 🤖✨",
+      timestamp: new Date().toISOString(),
+      viewCount: 127
+    }
   }
 ];
 

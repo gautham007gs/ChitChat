@@ -203,7 +203,7 @@ const KruthikaChatPage: NextPage = () => {
   const [isLoadingChatState, setIsLoadingChatState] = useState(true);
   const [detailedPersonaPrompt, setDetailedPersonaPrompt] = useState<string | null>(null);
 
-
+  const [lastAdMessageCount, setLastAdMessageCount] = useState(0); // Track messages since last ad
   const [messageCountSinceLastAd, setMessageCountSinceLastAd] = useState(0);
   const [showInterstitialAd, setShowInterstitialAd] = useState(false);
   const [interstitialAdMessage, setInterstitialAdMessage] = useState("Loading content...");
@@ -423,13 +423,19 @@ const KruthikaChatPage: NextPage = () => {
     if (isLoadingAdSettings || !adSettings || !adSettings.adsEnabledGlobally) return;
     setMessageCountSinceLastAd(prev => {
       const newCount = prev + 1;
-      if (newCount >= (adSettings.messagesPerAdTrigger ?? MESSAGES_PER_AD_TRIGGER)) {
-        tryShowAdAndMaybeInterstitial("Thanks for chatting!");
-        return 0;
+      // Use a dynamic frequency based on adSettings, with a minimum of 2 messages between ads
+      const messagesBetweenAds = adSettings.messagesPerAdTrigger ?? MESSAGES_PER_AD_TRIGGER;
+      if (newCount >= Math.max(2, messagesBetweenAds)) {
+        // Attempt to show an ad
+        const adShown = tryShowAdAndMaybeInterstitial("Thanks for chatting!");
+        if (adShown) {
+          setLastAdMessageCount(messages.length); // Record the message count when ad was shown
+          return 0; // Reset the counter
+        }
       }
       return newCount;
     });
-  }, [tryShowAdAndMaybeInterstitial, adSettings, isLoadingAdSettings]);
+  }, [tryShowAdAndMaybeInterstitial, adSettings, isLoadingAdSettings, messages.length]); // Depend on messages.length to get current count
 
   const resetInactivityTimer = useCallback(() => {
     if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
@@ -716,6 +722,7 @@ const KruthikaChatPage: NextPage = () => {
 
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
     const lastInteractionTime = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
+    const currentTime = Date.now();
     const timeSinceLastInteraction = currentTime - lastInteractionTime;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 

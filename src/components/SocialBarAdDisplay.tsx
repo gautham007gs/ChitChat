@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -22,8 +21,11 @@ const SocialBarAdDisplay: React.FC = () => {
   const adContainerRef = useRef<HTMLDivElement>(null);
   const scriptInjectedRef = useRef(false); // To prevent re-injecting the same script
 
+  // Check if we're in admin panel to prevent ads
+  const isAdminPanel = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
   useEffect(() => {
-    if (isLoadingAdSettings || !adSettings || !adSettings.adsEnabledGlobally) {
+    if (isLoadingAdSettings || !adSettings || !adSettings.adsEnabledGlobally || isAdminPanel) {
       setIsVisible(false);
       setAdCodeToInject(null);
       scriptInjectedRef.current = false;
@@ -41,7 +43,7 @@ const SocialBarAdDisplay: React.FC = () => {
       selectedAdCode = adSettings.monetagSocialBarCode;
       selectedNetworkEnabled = true;
     }
-    
+
     if (selectedNetworkEnabled && selectedAdCode.trim()) {
       // If the code changes, allow re-injection
       if (adCodeToInject !== selectedAdCode) {
@@ -54,14 +56,14 @@ const SocialBarAdDisplay: React.FC = () => {
       setIsVisible(false);
       scriptInjectedRef.current = false;
     }
-  }, [adSettings, isLoadingAdSettings, adCodeToInject]); // adCodeToInject in dep array for re-eval when it changes
+  }, [adSettings, isLoadingAdSettings, adCodeToInject, isAdminPanel]); // adCodeToInject and isAdminPanel in dep array for re-eval when it changes
 
   useEffect(() => {
     // Inject script only when adCodeToInject is set, container is available, and script hasn't been injected yet
     if (adCodeToInject && adContainerRef.current && !scriptInjectedRef.current) {
       // Clear previous content to handle potential ad code changes
       adContainerRef.current.innerHTML = '';
-      
+
       try {
         const fragment = document.createRange().createContextualFragment(adCodeToInject);
         adContainerRef.current.appendChild(fragment);
@@ -76,7 +78,7 @@ const SocialBarAdDisplay: React.FC = () => {
         // scriptInjectedRef.current = false; // Or keep true to prevent multiple failed attempts with same code
       }
     } else if (!adCodeToInject && adContainerRef.current) {
-      // If no ad code is to be injected (e.g., disabled), clear the container
+      // If no ad code to be injected (e.g., disabled or in admin panel), clear the container
       adContainerRef.current.innerHTML = '';
       scriptInjectedRef.current = false;
     }

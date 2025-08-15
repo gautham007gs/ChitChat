@@ -10,9 +10,12 @@ const GlobalAdScripts: React.FC = () => {
   const adsterraPopunderInjected = useRef(false);
   const monetagPopunderInjected = useRef(false);
   const adsterraSocialBarInjected = useRef(false);
+  
+  // Check if we're in admin panel to prevent ads
+  const isAdminPanel = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 
   useEffect(() => {
-    if (isLoadingAdSettings || !adSettings || typeof document === 'undefined') {
+    if (isLoadingAdSettings || !adSettings || typeof document === 'undefined' || isAdminPanel) {
       return;
     }
 

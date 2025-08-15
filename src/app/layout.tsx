@@ -36,26 +36,24 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        {/* <Providers> Removed this generic wrapper */}
-          <InstagramBrowserPrompt />
-          {/* Component for global ad scripts (e.g., Google AdSense) */}
-          <GlobalAdScripts />
-          <ErrorBoundary>
-            <AdSettingsProvider>
-              <AIProfileProvider>
-                <GlobalStatusProvider>
-                  <AIMediaAssetsProvider>
-                    {children}
-                    {/* Component to display social bar ads, present on all pages */}
-                    <SocialBarAdDisplay />
-                  </AIMediaAssetsProvider>
-                </GlobalStatusProvider>
-              </AIProfileProvider>
-            </AdSettingsProvider>
-          </ErrorBoundary>
-          {/* Component for displaying toasts (notifications) globally */}
-          <Toaster />
-        {/* </Providers> */}
+        <InstagramBrowserPrompt />
+        <ErrorBoundary>
+          <AdSettingsProvider>
+            <AIProfileProvider>
+              <GlobalStatusProvider>
+                <AIMediaAssetsProvider>
+                  {/* Component for global ad scripts - now inside providers */}
+                  <GlobalAdScripts />
+                  {children}
+                  {/* Component to display social bar ads, present on all pages */}
+                  <SocialBarAdDisplay />
+                </AIMediaAssetsProvider>
+              </GlobalStatusProvider>
+            </AIProfileProvider>
+          </AdSettingsProvider>
+        </ErrorBoundary>
+        {/* Component for displaying toasts (notifications) globally */}
+        <Toaster />
       </body>
     </html>
   );
