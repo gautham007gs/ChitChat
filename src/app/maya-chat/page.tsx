@@ -551,9 +551,6 @@ const KruthikaChatPage: NextPage = () => {
       const availableImages = currentMediaConfig.assets.filter(a => a.type === 'image').map(a => a.url);
       const availableAudio = currentMediaConfig.assets.filter(a => a.type === 'audio').map(a => a.url);
 
-      const hasAvailableImages = availableImages.length > 0;
-      const hasAvailableAudio = availableAudio.length > 0;
-
       // Generate user ID (in production, use proper user authentication)
       const userId = 'user_' + (typeof window !== 'undefined' ? (localStorage.getItem('userId') || Math.random().toString(36).substr(2, 9)) : 'anonymous');
       if (typeof window !== 'undefined' && !localStorage.getItem('userId')) {

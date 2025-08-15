@@ -1,17 +1,4 @@
-
 "use client";
-
-import React from 'react';
-
-interface Props {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error?: Error }>;
-}
-
-interface State {
-  hasError: boolean;
-  error?: Error;
-}
 
 import React from 'react';
 
@@ -71,4 +58,4 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
-export default ErrorBoundary;ry;
+export default ErrorBoundary;
