@@ -111,7 +111,6 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isAiTyping }) => {
           <Send className="h-5 w-5 text-primary-foreground" />
         </Button>
       ) : (
-        {/* Microphone button - Placeholder for voice input */}
         <Button variant="ghost" size="icon" type="button" className="text-muted-foreground hover:text-foreground/80 self-end shrink-0">
           <Mic className="h-5 w-5" />
         </Button>

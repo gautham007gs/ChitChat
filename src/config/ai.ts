@@ -170,6 +170,31 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
   ]
 };
 
+export const defaultAdminStatusDisplay: AdminStatusDisplay = {
+  name: "Maya",
+  profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  statusText: "Hey there! 😊",
+  timestamp: new Date().toISOString()
+};
+
+export const defaultManagedContactStatuses: ManagedContactStatus[] = [
+  {
+    name: "Sarah",
+    profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    statusText: "Coffee time! ☕",
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+  },
+  {
+    name: "Alex",
+    profilePicture: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    imageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    statusText: "Weekend vibes 🌟",
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+  }
+];
+
 // Export all required items
 export {
   defaultAIProfile,

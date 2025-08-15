@@ -32,6 +32,12 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
   "Hmm... kuch to gadbad hai. Thoda intezaar karo, fir se try karte hain.",
   "Mujhe lag raha hai server thoda mood mein nahi hai. Dubara bhejoge kya?",
   "Arre baap re! Signal hi nahi mil raha. Ek second ruk ja bhai.",
+  
+  // More engaging fallbacks
+  "Oops! My brain just went offline for a sec 🤪 Try again?",
+  "Arre! Mera wifi thoda dramatic ho gaya. One more time?",
+  "Technical difficulties! Par main hoon na tumhare saath 💪",
+  "Server mood swings chal rahe hain... but I'm here! 😊",
 
   // Ongoing, fresh-feeling responses
   "Abhi bhi nahi ho raha? Wait na, abhi kuch jugaad karti hoon...",
@@ -702,13 +708,13 @@ const KruthikaChatPage: NextPage = () => {
   useEffect(() => {
     if (!initialLoadComplete.current || isLoadingChatState || isLoadingAdSettings || isLoadingAIProfile || isLoadingMediaAssets) return;
 
-    const currentTime = Date.now();
+    const now = Date.now();
     const CACHE_FRESHNESS_WINDOW = 3600000; // 1 hour in milliseconds
 
-    if (cachedOfflineMessage && (currentTime - cachedOfflineMessage.timestamp < CACHE_FRESHNESS_WINDOW)) {
+    if (cachedOfflineMessage && (now - cachedOfflineMessage.timestamp < CACHE_FRESHNESS_WINDOW)) {
       // Use cached message if fresh
       const cachedMessage: Message = {
-        id: (currentTime + Math.random()).toString(), // Give it a new ID
+        id: (now + Math.random()).toString(), // Give it a new ID
         text: cachedOfflineMessage.message,
         sender: 'ai',
         timestamp: new Date(), // Use current time for display
@@ -722,8 +728,7 @@ const KruthikaChatPage: NextPage = () => {
 
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
     const lastInteractionTime = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
-    const currentTime = Date.now();
-    const timeSinceLastInteraction = currentTime - lastInteractionTime;
+    const timeSinceLastInteraction = now - lastInteractionTime;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
     if (messages.some(m => m.sender === 'user') && lastMessage && lastMessage.sender === 'user' && timeSinceLastInteraction > 2 * 60 * 60 * 1000 && Math.random() < 0.3) {
@@ -752,7 +757,7 @@ const KruthikaChatPage: NextPage = () => {
           };
           setMessages(prev => [...prev, offlineMessage]);
           // Cache the newly generated offline message
-      const newCachedMessage = { message: offlineResult.message, timestamp: currentTime };
+      const newCachedMessage = { message: offlineResult.message, timestamp: now };
       setCachedOfflineMessage(newCachedMessage);
       localStorage.setItem(CACHED_OFFLINE_MESSAGE_KEY, JSON.stringify(newCachedMessage));
       console.log("Generated and cached new offline message.");
