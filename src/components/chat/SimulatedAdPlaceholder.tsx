@@ -6,50 +6,89 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 
 interface SimulatedAdPlaceholderProps {
-  type: 'interstitial'; // Banner type is no longer used by this component directly
+  type: 'banner' | 'interstitial' | 'native';
   onClose?: () => void;
   message?: string;
-  duration?: number; // Optional duration for auto-close
+  duration?: number;
+  className?: string;
 }
 
-const SimulatedAdPlaceholder: React.FC<SimulatedAdPlaceholderProps> = ({ type, onClose, message, duration = 3000 }) => {
-  
+const SimulatedAdPlaceholder: React.FC<SimulatedAdPlaceholderProps> = ({
+  type,
+  onClose,
+  message = "Loading content...",
+  duration = 3000,
+  className = ""
+}) => {
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (duration && onClose) {
-      timer = setTimeout(() => {
-        onClose();
-      }, duration);
+    if (type === 'interstitial' && duration && onClose) {
+      const timer = setTimeout(onClose, duration);
+      return () => clearTimeout(timer);
     }
-    return () => clearTimeout(timer);
-  }, [duration, onClose]);
+  }, [type, duration, onClose]);
 
-  // This component is now ONLY for brief interstitial messages on the main page.
-  // The actual Adsterra ad is opened via window.open().
   if (type === 'interstitial') {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-        <div className="relative bg-card p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-xs text-card-foreground text-center">
+      <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
+          <div className="mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full mx-auto mb-4 animate-pulse"></div>
+            <p className="text-gray-700">{message}</p>
+          </div>
           {onClose && (
             <Button
+              onClick={onClose}
               variant="ghost"
               size="icon"
-              onClick={onClose}
-              className="absolute top-1 right-1 text-muted-foreground hover:text-foreground h-7 w-7"
-              aria-label="Close message"
+              className="absolute top-2 right-2"
             >
               <X className="h-4 w-4" />
             </Button>
           )}
-          <p className="text-sm text-foreground mt-2">
-            {message || "Loading..."}
-          </p>
         </div>
       </div>
     );
   }
 
-  return null; // Should not be called with other types now
+  if (type === 'banner') {
+    return (
+      <div className={`bg-gradient-to-r from-blue-400 to-purple-500 text-white p-4 text-center ${className}`}>
+        <p className="text-sm">{message}</p>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="sm"
+            className="ml-2 text-white hover:text-gray-200"
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // Native ad
+  return (
+    <div className={`bg-gray-100 border rounded-lg p-4 ${className}`}>
+      <div className="flex items-center space-x-3">
+        <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg"></div>
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-900">{message}</p>
+          <p className="text-xs text-gray-500">Sponsored content</p>
+        </div>
+        {onClose && (
+          <Button
+            onClick={onClose}
+            variant="ghost"
+            size="icon"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default SimulatedAdPlaceholder;

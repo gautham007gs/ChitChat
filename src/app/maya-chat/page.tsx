@@ -142,7 +142,13 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
     adLinkToShow = monetagLink;
   }
 
-  const isValidLink = (link: string | null | undefined): boolean => !!link && (link.startsWith('http://') || link.startsWith('https://')) && link !== DEFAULT_ADSTERRA_DIRECT_LINK && link !== DEFAULT_MONETAG_DIRECT_LINK && !link.toLowerconst isPlaceholder = adLinkToShow.toLowerCase().includes("placeholder");
+  const isValidLink = (link: string | null | undefined): boolean => {
+    if (!link) return false;
+    const isHttp = link.startsWith('http://') || link.startsWith('https://');
+    const isDefaultPlaceholder = link === DEFAULT_ADSTERRA_DIRECT_LINK || link === DEFAULT_MONETAG_DIRECT_LINK;
+    const isPlaceholder = link.toLowerCase().includes("placeholder");
+    return isHttp && !isDefaultPlaceholder && !isPlaceholder;
+  };
 
   if (!isValidLink(adLinkToShow)) {
     const originalNetworkAttempt = networkToTry;
@@ -160,7 +166,6 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
     }
     if (!isValidLink(adLinkToShow)) {
       console.warn(`Ad display: Fallback link for (${networkToTry}) is also invalid or default placeholder. No ad shown. Link: "${adLinkToShow}"`);
-      return false;}"`);
       return false;
     }
   }
