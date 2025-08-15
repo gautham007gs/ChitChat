@@ -75,12 +75,13 @@ export const defaultAIProfile: AIProfile = {
   customInstructions: "Be helpful, friendly, and engaging. Keep responses concise but meaningful.",
 };
 
-export const adminStatusDisplaySettings: AdminStatusDisplay = {
-  showOnHomepage: true,
-  showInChat: true,
-  enableStatusStory: true,
-  statusStoryImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-  statusStoryText: "Currently online and ready to chat! 💬✨",
+// Admin status display configuration - must be exported for GlobalStatusContext
+export const defaultAdminStatusDisplay: AdminStatusDisplay = {
+  id: "admin-status-001",
+  name: "Admin",
+  status: "Building something amazing! 🚀",
+  statusStoryText: "Hey everyone! I'm currently working on some exciting new features for our platform. Stay tuned for updates!",
+  statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
 export const managedContactStatus: ManagedContactStatus = {
@@ -89,15 +90,6 @@ export const managedContactStatus: ManagedContactStatus = {
   customStatusMessage: "Always here to help! 🌟",
   showLastSeen: true,
   showCustomStatus: true,
-};
-
-// Admin status display configuration
-export const defaultAdminStatusDisplay: AdminStatusDisplay = {
-  id: "admin-status-001",
-  name: "Admin",
-  status: "Building something amazing! 🚀",
-  statusStoryText: "Hey everyone! I'm currently working on some exciting new features for our platform. Stay tuned for updates!",
-  statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
 // Managed demo contacts configuration
@@ -193,5 +185,7 @@ export {
   defaultAdSettings,
   defaultAIMediaAssetsConfig,
   DEFAULT_ADSTERRA_DIRECT_LINK,
-  DEFAULT_MONETAG_DIRECT_LINK
+  DEFAULT_MONETAG_DIRECT_LINK,
+  defaultAdminStatusDisplay, // Exporting defaultAdminStatusDisplay
+  defaultManagedContactStatuses // Exporting defaultManagedContactStatuses
 };

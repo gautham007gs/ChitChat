@@ -21,6 +21,10 @@ export interface AIProfile {
   responseStyle: string;
   language: string;
   customInstructions: string;
+  status?: string;
+  statusStoryText?: string;
+  statusStoryImageUrl?: string;
+  statusStoryHasUpdate?: boolean;
 }
 
 export interface AvatarOption {

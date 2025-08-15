@@ -1,4 +1,3 @@
-
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google'; // Using Inter as a clean, readable font
 import './globals.css';
@@ -11,6 +10,7 @@ import { AdSettingsProvider } from '@/contexts/AdSettingsContext';
 import { AIProfileProvider } from '@/contexts/AIProfileContext';
 import { GlobalStatusProvider } from '@/contexts/GlobalStatusContext';
 import { AIMediaAssetsProvider } from '@/contexts/AIMediaAssetsContext';
+import ErrorBoundary from '@/components/ErrorBoundary'; // Assuming ErrorBoundary is in this path
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -37,23 +37,24 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
         {/* <Providers> Removed this generic wrapper */}
-          <AdSettingsProvider>
-            <AIProfileProvider>
-              <GlobalStatusProvider>
-                <AIMediaAssetsProvider>
-                  {/* Component to prompt users opening the site via Instagram's in-app browser */}
-                  <InstagramBrowserPrompt />
-                  {/* Component for global ad scripts (e.g., Google AdSense) */}
-                  <GlobalAdScripts />
-                  {children}
-                  {/* Component to display social bar ads, present on all pages */}
-                  <SocialBarAdDisplay />
-                  {/* Component for displaying toasts (notifications) globally */}
-                  <Toaster />
-                </AIMediaAssetsProvider>
-              </GlobalStatusProvider>
-            </AIProfileProvider>
-          </AdSettingsProvider>
+          <InstagramBrowserPrompt />
+          {/* Component for global ad scripts (e.g., Google AdSense) */}
+          <GlobalAdScripts />
+          <ErrorBoundary>
+            <AdSettingsProvider>
+              <AIProfileProvider>
+                <GlobalStatusProvider>
+                  <AIMediaAssetsProvider>
+                    {children}
+                    {/* Component to display social bar ads, present on all pages */}
+                    <SocialBarAdDisplay />
+                  </AIMediaAssetsProvider>
+                </GlobalStatusProvider>
+              </AIProfileProvider>
+            </AdSettingsProvider>
+          </ErrorBoundary>
+          {/* Component for displaying toasts (notifications) globally */}
+          <Toaster />
         {/* </Providers> */}
       </body>
     </html>

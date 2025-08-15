@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { NextPage } from 'next';
@@ -8,7 +7,7 @@ import ChatHeader from '@/components/chat/ChatHeader';
 import ChatView from '@/components/chat/ChatView';
 import ChatInput from '@/components/chat/ChatInput';
 import type { Message, AIProfile, MessageStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
-import { defaultAIProfile, defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK } from '@/config/ai'; 
+import { defaultAIProfile, defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK } from '@/config/ai';
 import { generateResponse, type EmotionalStateInput, type EmotionalStateOutput } from '@/ai/flows/emotional-state-simulation';
 import { generateOfflineMessage, type OfflineMessageInput } from '@/ai/flows/offline-message-generation';
 import { useToast } from "@/hooks/use-toast";
@@ -21,7 +20,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { format, isToday } from 'date-fns';
 import { useAdSettings } from '@/contexts/AdSettingsContext';
 import { useAIProfile } from '@/contexts/AIProfileContext';
-import { useAIMediaAssets } from '@/contexts/AIMediaAssetsContext'; 
+import { useAIMediaAssets } from '@/contexts/AIMediaAssetsContext';
 import { generateInitialPersonaPrompt } from '@/ai/flows/generate-initial-persona-prompt';
 
 
@@ -54,7 +53,7 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
 
 
 // These constants will now be effectively overridden by AdSettings from context
-// const MAX_ADS_PER_DAY = 6; 
+// const MAX_ADS_PER_DAY = 6;
 // const MAX_ADS_PER_SESSION = 3;
 const MESSAGES_PER_AD_TRIGGER = 10; // Kept as a fixed trigger point
 const INACTIVITY_AD_TIMEOUT_MS = 60000; // 1 minute
@@ -95,7 +94,7 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
   if (lastShownDate !== todayStr) {
     currentDailyCount = 0;
     localStorage.setItem(APP_ADS_LAST_SHOWN_DATE_KEY, todayStr);
-    currentSessionCount = 0; 
+    currentSessionCount = 0;
     sessionStorage.setItem(APP_ADS_SESSION_COUNT_KEY, '0');
   }
   localStorage.setItem(APP_ADS_DAILY_COUNT_KEY, currentDailyCount.toString());
@@ -114,9 +113,9 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
 
   const adsterraDirectEnabled = activeAdSettings.adsterraDirectLinkEnabled;
   const monetagDirectEnabled = activeAdSettings.monetagDirectLinkEnabled;
-  
-  const adsterraLink = activeAdSettings.adsterraDirectLink; 
-  const monetagLink = activeAdSettings.monetagDirectLink;  
+
+  const adsterraLink = activeAdSettings.adsterraDirectLink;
+  const monetagLink = activeAdSettings.monetagDirectLink;
 
   if (!adsterraDirectEnabled && !monetagDirectEnabled) {
     console.warn("Ad display: No direct link networks enabled in settings.");
@@ -130,13 +129,13 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
   } else if (monetagDirectEnabled) {
     networkToTry = 'monetag';
   }
-  
+
   if (networkToTry === 'adsterra') {
     adLinkToShow = adsterraLink;
   } else if (networkToTry === 'monetag') {
     adLinkToShow = monetagLink;
   }
-  
+
   const isValidLink = (link: string | null | undefined): boolean => !!link && (link.startsWith('http://') || link.startsWith('https://')) && link !== DEFAULT_ADSTERRA_DIRECT_LINK && link !== DEFAULT_MONETAG_DIRECT_LINK && !link.toLowerCase().includes("placeholder");
 
   if (!isValidLink(adLinkToShow)) {
@@ -155,10 +154,10 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
     }
     if (!isValidLink(adLinkToShow)) {
       console.warn(`Ad display: Fallback link for (${networkToTry}) is also invalid or default placeholder. No ad shown. Link: "${adLinkToShow}"`);
-      return false; 
+      return false;
     }
   }
-  
+
   try {
     const anchor = document.createElement('a');
     anchor.href = adLinkToShow!;
@@ -189,7 +188,7 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
 const KruthikaChatPage: NextPage = () => {
   const { adSettings, isLoadingAdSettings } = useAdSettings();
   const { aiProfile: globalAIProfile, isLoadingAIProfile } = useAIProfile();
-  const { mediaAssetsConfig, isLoadingMediaAssets } = useAIMediaAssets(); 
+  const { mediaAssetsConfig, isLoadingMediaAssets } = useAIMediaAssets();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [aiMood, setAiMood] = useState<string>("neutral");
@@ -208,7 +207,7 @@ const KruthikaChatPage: NextPage = () => {
   const [messageCountSinceLastAd, setMessageCountSinceLastAd] = useState(0);
   const [showInterstitialAd, setShowInterstitialAd] = useState(false);
   const [interstitialAdMessage, setInterstitialAdMessage] = useState("Loading content...");
-  
+
   const inactivityTimerRef = useRef<NodeJS.Timeout | null>(null);
   const interstitialAdTimerRef = useRef<NodeJS.Timeout | null>(null);
   const userSentMediaThisTurnRef = useRef(false);
@@ -223,10 +222,10 @@ const KruthikaChatPage: NextPage = () => {
   };
 
   const tryShowAdAndMaybeInterstitial = useCallback((interstitialMsg?: string): boolean => {
-    if (isLoadingAdSettings || !adSettings) { 
+    if (isLoadingAdSettings || !adSettings) {
       return false;
     }
-    const adShown = tryShowRotatedAd(adSettings); 
+    const adShown = tryShowRotatedAd(adSettings);
     if (adShown && interstitialMsg) {
         triggerBriefInterstitialMessage(interstitialMsg, REWARD_AD_INTERSTITIAL_DURATION_MS);
     }
@@ -262,7 +261,7 @@ const KruthikaChatPage: NextPage = () => {
           .from('daily_activity_log')
           .insert({ user_pseudo_id: userPseudoId, activity_date: today, chat_id: 'kruthika_chat' })
           .then(({ error }) => {
-            if (error && error.code !== '23505') { 
+            if (error && error.code !== '23505') {
               console.error('Error logging daily activity to Supabase:', error.message);
             } else if (!error) {
               localStorage.setItem(LAST_ACTIVE_DATE_KEY, today);
@@ -330,7 +329,7 @@ const KruthikaChatPage: NextPage = () => {
         console.log("No cached persona prompt found, generating...");
         // You need to have the simple persona description available here.
         // Assuming you can use the effective AI name as a simple description
-        const simplePersonaDescription = effectiveAIProfile.name; 
+        const simplePersonaDescription = effectiveAIProfile.name;
         try {
             // Make sure generateInitialPersonaPrompt is imported at the top of the file
             const personaResult = await generateInitialPersonaPrompt({ personaDescription: simplePersonaDescription });
@@ -345,7 +344,7 @@ const KruthikaChatPage: NextPage = () => {
         }
       }
       // Set the generated or cached detailed persona prompt in state
-      setDetailedPersonaPrompt(currentDetailedPersonaPrompt); 
+      setDetailedPersonaPrompt(currentDetailedPersonaPrompt);
 
       // --- End Caching Logic ---
 
@@ -381,11 +380,11 @@ const KruthikaChatPage: NextPage = () => {
   }, [toast, globalAIProfile]);
 
   useEffect(() => {
-    if (!isLoadingAIProfile && globalAIProfile) { 
+    if (!isLoadingAIProfile && globalAIProfile) {
         loadInitialChatState();
     } else if (!isLoadingAIProfile && !globalAIProfile) {
         console.warn("[KruthikaChatPage] AI Profile context loaded, but profile is null. Using defaults for chat init.");
-        loadInitialChatState(); 
+        loadInitialChatState();
     }
   }, [isLoadingAIProfile, globalAIProfile, loadInitialChatState]);
 
@@ -425,7 +424,7 @@ const KruthikaChatPage: NextPage = () => {
     setMessageCountSinceLastAd(prev => {
       const newCount = prev + 1;
       if (newCount >= (adSettings.messagesPerAdTrigger ?? MESSAGES_PER_AD_TRIGGER)) {
-        tryShowAdAndMaybeInterstitial("Thanks for chatting!"); 
+        tryShowAdAndMaybeInterstitial("Thanks for chatting!");
         return 0;
       }
       return newCount;
@@ -453,16 +452,16 @@ const KruthikaChatPage: NextPage = () => {
 
 
   const handleSendMessage = async (text: string, imageUriFromInput?: string) => {
-    let currentImageUri = imageUriFromInput; 
+    let currentImageUri = imageUriFromInput;
     const currentEffectiveAIProfile = globalAIProfile || defaultAIProfile;
 
     if (!text.trim() && !currentImageUri) return;
-    if (isLoadingAdSettings || isLoadingAIProfile || isLoadingMediaAssets) { 
+    if (isLoadingAdSettings || isLoadingAIProfile || isLoadingMediaAssets) {
         toast({ title: "Please wait", description: "Loading essential settings...", variant: "default"});
         return;
     }
     resetInactivityTimer();
-    
+
     let imageAttemptedAndAllowed = false;
 
     if (currentImageUri) {
@@ -481,10 +480,10 @@ const KruthikaChatPage: NextPage = () => {
                 variant: "destructive",
                 duration: 5000,
             });
-            currentImageUri = undefined; 
-            if (!text.trim()) return; 
+            currentImageUri = undefined;
+            if (!text.trim()) return;
         } else {
-            imageAttemptedAndAllowed = true; 
+            imageAttemptedAndAllowed = true;
         }
     }
     userSentMediaThisTurnRef.current = !!currentImageUri;
@@ -533,7 +532,7 @@ const KruthikaChatPage: NextPage = () => {
       const currentMediaConfig = mediaAssetsConfig || defaultAIMediaAssetsConfig;
       const availableImages = currentMediaConfig.assets.filter(a => a.type === 'image').map(a => a.url);
       const availableAudio = currentMediaConfig.assets.filter(a => a.type === 'audio').map(a => a.url);
-      
+
       const hasAvailableImages = availableImages.length > 0;
       const hasAvailableAudio = availableAudio.length > 0;
 
@@ -552,9 +551,9 @@ const KruthikaChatPage: NextPage = () => {
 
       if (aiResult.proactiveImageUrl || aiResult.proactiveAudioUrl) {
         if (adSettings && adSettings.adsEnabledGlobally) {
-            tryShowAdAndMaybeInterstitial(`Loading ${currentEffectiveAIProfile.name}'s share...`);
+            tryShowAdAndMaybeInterstitial("Loading ${currentEffectiveAIProfile.name}'s share...");
         }
-        await new Promise(resolve => setTimeout(resolve, 200)); 
+        await new Promise(resolve => setTimeout(resolve, 200));
       }
 
       const logAiMessageToSupabase = async (aiText: string, aiMsgId: string, hasImage: boolean = false, hasAudio: boolean = false) => {
@@ -567,7 +566,7 @@ const KruthikaChatPage: NextPage = () => {
                 sender_type: 'ai',
                 chat_id: 'kruthika_chat',
                 text_content: aiText.substring(0, 500),
-                has_image: hasImage || hasAudio, 
+                has_image: hasImage || hasAudio,
               }]);
             if (aiLogError) console.error('Supabase error logging AI message:', aiLogError.message);
           } catch (e: any) { console.error('Supabase AI message logging failed (catch block):', e?.message || String(e)); }
@@ -598,9 +597,9 @@ const KruthikaChatPage: NextPage = () => {
       };
 
       const processAiMediaMessage = async (mediaType: 'image' | 'audio', url: string, caption?: string) => {
-        const typingDuration = Math.min(Math.max((caption || "").length * 60, 800), 2000); 
+        const typingDuration = Math.min(Math.max((caption || "").length * 60, 800), 2000);
         await new Promise(resolve => setTimeout(resolve, typingDuration));
-        
+
         const newAiMediaMessageId = (Date.now() + Math.random()).toString() + `_${mediaType}`;
         const newAiMediaMessage: Message = {
             id: newAiMediaMessageId,
@@ -616,8 +615,8 @@ const KruthikaChatPage: NextPage = () => {
         setRecentInteractions(prevInteractions => [...prevInteractions, `AI: ${caption || ""}[Sent a ${mediaType}] ${url}`].slice(-10));
         await logAiMessageToSupabase(caption || `[Sent ${mediaType}]`, newAiMediaMessageId, mediaType === 'image', mediaType === 'audio');
       };
-      
-      setIsAiTyping(true); 
+
+      setIsAiTyping(true);
 
       if (aiResult.proactiveImageUrl && aiResult.mediaCaption) {
         await processAiMediaMessage('image', aiResult.proactiveImageUrl, aiResult.mediaCaption);
@@ -628,29 +627,29 @@ const KruthikaChatPage: NextPage = () => {
           for (let i = 0; i < aiResult.response.length; i++) {
             const part = aiResult.response[i];
             if (part.trim() === '') continue;
-            if (i > 0) setIsAiTyping(true); 
+            if (i > 0) setIsAiTyping(true);
             await processAiTextMessage(part, `_part${i}`);
-            setIsAiTyping(false); 
+            setIsAiTyping(false);
             if (i < aiResult.response.length - 1) {
               const interMessageDelay = 500 + Math.random() * 500;
               await new Promise(resolve => setTimeout(resolve, interMessageDelay));
             }
           }
-        } else if (aiResult.response.trim() !== '') { 
+        } else if (aiResult.response.trim() !== '') {
           await processAiTextMessage(aiResult.response);
         }
       }
-      
-      setIsAiTyping(false); 
+
+      setIsAiTyping(false);
       if (aiResult.newMood) setAiMood(aiResult.newMood);
 
-      if (imageAttemptedAndAllowed && currentImageUri) { 
+      if (imageAttemptedAndAllowed && currentImageUri) {
           const todayStr = new Date().toDateString();
           let currentUploadCount = parseInt(localStorage.getItem(USER_IMAGE_UPLOAD_COUNT_KEY_KRUTHIKA) || '0', 10);
           const lastUploadDate = localStorage.getItem(USER_IMAGE_UPLOAD_LAST_DATE_KEY_KRUTHIKA);
 
           if (lastUploadDate !== todayStr) {
-              currentUploadCount = 0; 
+              currentUploadCount = 0;
           }
           currentUploadCount++;
           localStorage.setItem(USER_IMAGE_UPLOAD_COUNT_KEY_KRUTHIKA, currentUploadCount.toString());
@@ -658,9 +657,9 @@ const KruthikaChatPage: NextPage = () => {
       }
 
 
-      if (userSentMediaThisTurnRef.current) { 
+      if (userSentMediaThisTurnRef.current) {
         if (adSettings && adSettings.adsEnabledGlobally && Math.random() < (adSettings.userMediaInterstitialChance ?? USER_MEDIA_INTERSTITIAL_CHANCE)) {
-            tryShowAdAndMaybeInterstitial("Just a moment..."); 
+            tryShowAdAndMaybeInterstitial("Just a moment...");
         }
         userSentMediaThisTurnRef.current = false;
       }
@@ -720,9 +719,9 @@ const KruthikaChatPage: NextPage = () => {
     const timeSinceLastInteraction = currentTime - lastInteractionTime;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
-    if (messages.some(m => m.sender === 'user') && lastMessage && lastMessage.sender === 'user' && timeSinceLastInteraction > 2 * 60 * 60 * 1000 && Math.random() < 0.3) { 
+    if (messages.some(m => m.sender === 'user') && lastMessage && lastMessage.sender === 'user' && timeSinceLastInteraction > 2 * 60 * 60 * 1000 && Math.random() < 0.3) {
       const { hour: currentISTHour } = getISTTimeParts();
-      if (!(currentISTHour >= 5 && currentISTHour < 12)) return; 
+      if (!(currentISTHour >= 5 && currentISTHour < 12)) return;
 
       const generateAndAddOfflineMessage = async () => {
         setIsAiTyping(true);
@@ -751,12 +750,12 @@ const KruthikaChatPage: NextPage = () => {
       localStorage.setItem(CACHED_OFFLINE_MESSAGE_KEY, JSON.stringify(newCachedMessage));
       console.log("Generated and cached new offline message.");
 
-          if(adSettings && adSettings.adsEnabledGlobally) maybeTriggerAdOnMessageCount(); 
+          if(adSettings && adSettings.adsEnabledGlobally) maybeTriggerAdOnMessageCount();
           setRecentInteractions(prev => [...prev, `AI: ${offlineResult.message}`].slice(-10));
           if (supabase) {
             try {
                 const { error: offlineLogError } = await supabase.from('messages_log').insert([{
-                    message_id: newOfflineMsgId, sender_type: 'ai', chat_id: 'kruthika_chat_offline_ping', 
+                    message_id: newOfflineMsgId, sender_type: 'ai', chat_id: 'kruthika_chat_offline_ping',
                     text_content: offlineResult.message.substring(0, 500), has_image: false,
                 }]);
                 if (offlineLogError) console.error('Supabase error logging offline AI message:', offlineLogError.message);
@@ -780,7 +779,7 @@ const KruthikaChatPage: NextPage = () => {
       return { hour: istDate.getHours(), minutes: istDate.getMinutes() };
     };
     const { hour: currentISTHour } = getISTTimePartsLocal();
-    const isKruthikaActiveHours = currentISTHour >= 5 && currentISTHour < 12; 
+    const isKruthikaActiveHours = currentISTHour >= 5 && currentISTHour < 12;
     const lastAiMessage = messages.slice().reverse().find(msg => msg.sender === 'ai');
 
     if (isKruthikaActiveHours) {
@@ -789,8 +788,8 @@ const KruthikaChatPage: NextPage = () => {
             const lastSeenTime = new Date(lastAiMessage.timestamp);
             const diffMs = now.getTime() - lastSeenTime.getTime();
             const diffMins = Math.round(diffMs / 60000);
-            if (diffMins < 3) return "online"; 
-        } else return "online"; 
+            if (diffMins < 3) return "online";
+        } else return "online";
     }
     if (lastAiMessage) {
       const now = new Date();
@@ -811,9 +810,9 @@ const KruthikaChatPage: NextPage = () => {
       }
     }
     if (isKruthikaActiveHours) return "online";
-    if (currentISTHour >= 12 && currentISTHour < 17) return `probably busy, back in morning`; 
-    if (currentISTHour >= 17 && currentISTHour < 21) return `winding down, back tomorrow`; 
-    return `sleeping, back at 5 AM IST`; 
+    if (currentISTHour >= 12 && currentISTHour < 17) return `probably busy, back in morning`;
+    if (currentISTHour >= 17 && currentISTHour < 21) return `winding down, back tomorrow`;
+    return `sleeping, back at 5 AM IST`;
   }, [messages, isAiTyping]);
 
   const handleOpenAvatarZoom = () => {
@@ -836,7 +835,7 @@ const KruthikaChatPage: NextPage = () => {
   if (isLoadingAIProfile || !globalAIProfile || isLoadingAdSettings || isLoadingMediaAssets || isLoadingChatState ) {
     return <div className="flex justify-center items-center h-screen bg-chat-bg-default text-foreground">Loading Kruthika's Chat...</div>;
   }
-  
+
   return (
     <div className="flex flex-col h-screen max-w-3xl mx-auto bg-chat-bg-default shadow-2xl">
       <ChatHeader
@@ -844,14 +843,14 @@ const KruthikaChatPage: NextPage = () => {
         aiAvatarUrl={displayAIProfile.avatarUrl}
         onlineStatus={onlineStatus}
         onAvatarClick={handleOpenAvatarZoom}
-        onCallClick={handleCallVideoClick} 
+        onCallClick={handleCallVideoClick}
         onVideoClick={handleCallVideoClick}
       />
-      <ChatView 
-        messages={messages} 
-        aiAvatarUrl={displayAIProfile.avatarUrl} 
+      <ChatView
+        messages={messages}
+        aiAvatarUrl={displayAIProfile.avatarUrl}
         aiName={displayAIProfile.name}
-        isAiTyping={isAiTyping} 
+        isAiTyping={isAiTyping}
         onTriggerAd={handleBubbleAdTrigger}
       />
 
@@ -866,9 +865,9 @@ const KruthikaChatPage: NextPage = () => {
           duration={REWARD_AD_INTERSTITIAL_DURATION_MS}
         />
       )}
-      
+
       <BannerAdDisplay adType="standard" placementKey="chatViewBottomStandard" className="mx-auto w-full max-w-md" />
-      
+
       <div className="my-1 mx-auto w-full max-w-md">
         <BannerAdDisplay adType="native" placementKey="chatViewBottomNative" />
       </div>
@@ -877,7 +876,7 @@ const KruthikaChatPage: NextPage = () => {
       <ChatInput onSendMessage={handleSendMessage} isAiTyping={isAiTyping} />
 
        <Dialog open={showZoomedAvatarDialog} onOpenChange={setShowZoomedAvatarDialog}>
-          <DialogContent 
+          <DialogContent
             className="fixed left-[50%] top-[50%] z-50 grid w-[90vw] max-w-xs translate-x-[-50%] translate-y-[-50%] border bg-neutral-900 p-0 shadow-lg duration-200 sm:rounded-lg flex flex-col overflow-hidden aspect-square max-h-[90vw] sm:max-h-[70vh]"
           >
               <DialogHeader className="flex flex-row items-center space-x-2 p-3 bg-neutral-800/80 backdrop-blur-sm sticky top-0 z-10">
@@ -888,16 +887,16 @@ const KruthikaChatPage: NextPage = () => {
                 </DialogClose>
                 <DialogTitle className="text-lg font-semibold text-white">{displayAIProfile.name}</DialogTitle>
               </DialogHeader>
-              
+
               <div className="relative flex-1 w-full bg-black flex items-center justify-center overflow-hidden">
                 {zoomedAvatarUrl && (
-                  <Image 
-                    key={`zoomed-${zoomedAvatarUrl}`} 
-                    src={zoomedAvatarUrl} 
-                    alt={`${displayAIProfile.name}'s zoomed avatar`} 
+                  <Image
+                    key={`zoomed-${zoomedAvatarUrl}`}
+                    src={zoomedAvatarUrl}
+                    alt={`${displayAIProfile.name}'s zoomed avatar`}
                     fill
                     style={{ objectFit: 'contain' }}
-                    className="rounded-sm" 
+                    className="rounded-sm"
                     data-ai-hint="profile woman large"
                     priority={true}
                     unoptimized // For original quality as requested for status, applying here too
