@@ -37,7 +37,7 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
   "Oops! My brain just went offline for a sec 🤪 Try again?",
   "Arre! Mera wifi thoda dramatic ho gaya. One more time?",
   "Technical difficulties! Par main hoon na tumhare saath 💪",
-  "Server mood swings chal rahe hain... but I'm here for you! 💕"e! 😊",
+  "Server mood swings chal rahe hain... but I'm here for you! 💕",
 
   // Ongoing, fresh-feeling responses
   "Abhi bhi nahi ho raha? Wait na, abhi kuch jugaad karti hoon...",
@@ -593,10 +593,24 @@ Reply as Maya would - short, sweet, and loving:`;
         await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
       }
 
+      // Simple development fallback responses when API is not available
+      const getCachedResponse = (prompt: string): string | null => {
+        if (!AI_CONFIG.apiKey || AI_CONFIG.apiKey === '') {
+          const fallbackResponses = [
+            "Hey! API key not set yet, but I'm here! 😊",
+            "Missing API credentials, but still chatting with you! 💕",
+            "Set up the API key to unlock my full potential! ✨",
+            "Development mode - I'd love to chat more with proper setup! 🥰"
+          ];
+          return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        }
+        return null;
+      };
+
       const cachedResponse = getCachedResponse(prompt);
       if (cachedResponse) {
         const aiMessage: Message = {
-          id: Date.now().toString(), // Use a unique ID for new messages
+          id: Date.now().toString(),
           text: cachedResponse,
           sender: 'ai',
           timestamp: new Date(),

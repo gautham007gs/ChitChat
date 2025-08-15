@@ -1,13 +1,32 @@
-
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Supabase configuration
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'placeholder-url';
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+
+// Check if we have real credentials
+const hasRealCredentials = supabaseUrl !== 'placeholder-url' &&
+                          supabaseAnonKey !== 'placeholder-key' &&
+                          !supabaseUrl.includes('placeholder') &&
+                          !supabaseAnonKey.includes('placeholder');
+
+// Only show warning in development and when not using mock client
+if (typeof window !== 'undefined' && !hasRealCredentials && process.env.NODE_ENV === 'development') {
+  // Reduced warning frequency - only warn once per session
+  const warningKey = 'supabase_credentials_warning_shown';
+  if (!sessionStorage.getItem(warningKey)) {
+    console.warn('🔧 Development Mode: Using mock Supabase client. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY for production.');
+    sessionStorage.setItem(warningKey, 'true');
+  }
+}
+
 
 let supabase: SupabaseClient;
 
 const createMockClient = (reason: string): SupabaseClient => {
-  console.warn(`Supabase Client: Using MOCK client. Reason: ${reason}. Analytics and global configs will not be fetched/saved from/to Supabase.`);
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🔧 Development: Using mock Supabase client. Set credentials for production features.`);
+  }
   return {
     from: (table: string) => ({
       select: async (selectQuery = '*', options = {}) => {

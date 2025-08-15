@@ -1,8 +1,8 @@
-
 import type { AIProfile, AvatarOption, AdminStatusDisplay, ManagedContactStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
 
 // Cost-optimized configuration for Vertex AI Gemini
 export const AI_CONFIG = {
+  // Gemini AI Configuration
   // Use Gemini 1.5 Flash for cost efficiency
   model: 'gemini-1.5-flash-001',
   maxTokens: 100, // Reduced for cost efficiency and short responses
@@ -27,18 +27,18 @@ export function trackTokenUsage(userId: string, tokens: number): { allowed: bool
   const now = Date.now();
   const today = new Date(now).toDateString();
   const userKey = `${userId}_${today}`;
-  
+
   let usage = userTokenUsage.get(userKey);
   if (!usage || new Date(usage.lastReset).toDateString() !== today) {
     usage = { tokens: 0, lastReset: now };
   }
-  
+
   usage.tokens += tokens;
   userTokenUsage.set(userKey, usage);
-  
+
   const limit = AI_CONFIG.rateLimiting.maxTokensPerUser;
   const usagePercent = usage.tokens / limit;
-  
+
   if (usagePercent >= 1) {
     return { 
       allowed: false, 
@@ -46,7 +46,7 @@ export function trackTokenUsage(userId: string, tokens: number): { allowed: bool
       message: "I'm feeling a bit tired today... Can we continue our chat tomorrow? I'll miss you! 💕"
     };
   }
-  
+
   if (usagePercent >= 0.8) {
     return { 
       allowed: true, 
@@ -54,7 +54,7 @@ export function trackTokenUsage(userId: string, tokens: number): { allowed: bool
       message: "I need to think about this... Give me a moment, okay? 😊"
     };
   }
-  
+
   return { allowed: true, shouldDelay: false };
 }
 
