@@ -1,0 +1,32 @@
+Error: ❌ "Failed to initialize Supabase client: Failed to construct 'URL': Invalid URL. Check if NEXT_PUBLIC_SUPABASE_URL is a valid URL."
+    at createUnhandledError (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_client_43e3ffb8._.js:879:71)
+    at handleClientError (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_client_43e3ffb8._.js:1052:56)
+    at console.error (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_client_43e3ffb8._.js:1191:56)
+    at [project]/src/lib/supabaseClient.ts [app-client] (ecmascript) (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/src_5d04078d._.js:1175:17)
+    at https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:709:27
+    at runModuleExecutionHooks (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:755:9)
+    at instantiateModule (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:707:9)
+    at getOrInstantiateModuleFromParent (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:640:12)
+    at esmImport (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:143:20)
+    at [project]/src/contexts/AdSettingsContext.tsx [app-client] (ecmascript) (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/src_5d04078d._.js:1206:157)
+    at https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:709:27
+    at runModuleExecutionHooks (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:755:9)
+    at instantiateModule (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:707:9)
+    at getOrInstantiateModuleFromParent (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:640:12)
+    at esmImport (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:143:20)
+    at [project]/src/components/chat/BannerAdDisplay.tsx [app-client] (ecmascript) (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_7fcca845._.js:198:166)
+    at https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:709:27
+    at runModuleExecutionHooks (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:755:9)
+    at instantiateModule (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:707:9)
+    at getOrInstantiateModuleFromParent (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:640:12)
+    at esmImport (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:143:20)
+    at [project]/src/app/page.tsx [app-client] (ecmascript) (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_7fcca845._.js:338:174)
+    at https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:709:27
+    at runModuleExecutionHooks (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:755:9)
+    at instantiateModule (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:707:9)
+    at getOrInstantiateModuleFromParent (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:640:12)
+    at commonJsRequire (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/_be317ff2._.js:158:20)
+    at requireModule (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:16492:86)
+    at initializeModuleChunk (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17034:25)
+    at resolveModuleChunk (https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17003:43)
+    at https://59b48c5f-4ecc-495c-a616-ee868757ba4c-00-6mrhni769u0h.sisko.replit.dev/_next/static/chunks/node_modules_next_dist_compiled_2ce9398a._.js:17377:24
