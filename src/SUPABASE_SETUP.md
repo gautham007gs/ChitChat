@@ -1,24 +1,23 @@
-
 # Supabase Setup for Kruthika Chat Analytics & Configuration
 
 This guide explains how to set up a Supabase project to:
-1.  Collect analytics (like total messages and daily active user estimates) for your Kruthika Chat application.
-2.  Store and manage global application configurations, such as Ad Settings, so they are universal for all users.
+1. Collect analytics (like total messages and daily active user estimates) for your Kruthika Chat application.
+2. Store and manage global application configurations, such as Ad Settings, so they are universal for all users.
 
 ## 1. Create a Supabase Account and Project
 
-1.  Go to [supabase.com](https://supabase.com/) and sign up for a free account if you don't have one.
-2.  Create a new project. Choose a name, generate a strong database password (save this securely!), and select a region. The free tier is sufficient for this setup.
+1. Go to [supabase.com](https://supabase.com/) and sign up for a free account if you don't have one.
+2. Create a new project. Choose a name, generate a strong database password (save this securely!), and select a region. The free tier is sufficient for this setup.
 
 ## 2. Get Your Project URL and Anon Key
 
 Once your project is created:
 
-1.  Navigate to your project dashboard in Supabase.
-2.  Go to **Project Settings** (usually a gear icon).
-3.  Click on **API**.
-4.  You will find your **Project URL** and the **Project API Key** (specifically, the `anon` `public` key).
-5.  Copy these values.
+1. Navigate to your project dashboard in Supabase.
+2. Go to **Project Settings** (usually a gear icon).
+3. Click on **API**.
+4. You will find your **Project URL** and the **Project API Key** (specifically, the `anon` `public` key).
+5. Copy these values.
 
 ## 3. Configure Environment Variables
 
@@ -26,7 +25,7 @@ In your Kruthika Chat project, open the `.env.local` file (or create one if it d
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_project_anon_key_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # Make sure your GOOGLE_API_KEY is also set for Genkit
 GOOGLE_API_KEY=your_gemini_api_key_here
@@ -38,9 +37,9 @@ GOOGLE_API_KEY=your_gemini_api_key_here
 
 The application is configured to log messages, daily activity, and store global configurations. You need to create these in your Supabase database.
 
-1.  In your Supabase project dashboard, go to the **SQL Editor** (looks like an SQL query icon).
-2.  Click **"+ New query"**.
-3.  Paste the following SQL code in sections and click **"RUN"** for each section.
+1. In your Supabase project dashboard, go to the **SQL Editor** (looks like an SQL query icon).
+2. Click **"+ New query"**.
+3. Paste the following SQL code in sections and click **"RUN"** for each section.
 
 **Section 1: `messages_log` Table and Related Function (for message counts)**
 
@@ -161,7 +160,7 @@ COMMENT ON COLUMN public.app_configurations.id IS 'Unique identifier for the con
 COMMENT ON COLUMN public.app_configurations.settings IS 'The actual configuration object stored as JSONB';
 ALTER TABLE public.app_configurations ENABLE ROW LEVEL SECURITY;
 
--- Policy: Allow ALL users (including anonymous) to READ configurations.
+-- Policy: Allow ALL users (including anonymous) to FETCH configurations.
 -- This is necessary for the app to fetch settings like AI Profile, Ad Settings, etc., for all users.
 CREATE POLICY "Allow anon reads for app configurations"
 ON public.app_configurations
@@ -178,7 +177,7 @@ USING (true);
 -- DROP POLICY IF EXISTS "Allow anon UPDATES for app configurations - EXTREMELY DANGEROUS FOR PRODUCTION - PROTOTYPE ONLY" ON public.app_configurations;
 
 -- OPTION 1: Restrict by a specific Admin User ID (UID)
--- Get your admin user's UID from Supabase Authentication dashboard (Users -> find your admin -> copy UID)
+-- Get your admin user's UID from Supabase Auth dashboard (Users -> find your admin -> copy UID)
 -- Replace 'your_admin_user_id_here' with the actual UID.
 /*
 CREATE POLICY "Allow ADMIN (by UID) to insert configurations"
@@ -252,7 +251,6 @@ VALUES ('ad_settings_kruthika_chat_v1', '{
   "maxDirectLinkAdsPerSession": 3
 }');
 */
-```
 
 **Section 4: Grant Execute Permissions on Functions**
 ```sql
@@ -289,5 +287,3 @@ After setting environment variables, running SQL, and deploying any code changes
 *   **Other Supabase Issues:** Check browser console and Supabase logs.
 
 This setup moves towards a more secure admin panel. Remember to use strong, unique passwords and keep your Supabase project secure.
-
-    

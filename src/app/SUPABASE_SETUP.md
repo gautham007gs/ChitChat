@@ -1,4 +1,3 @@
-
 # Supabase Setup for Kruthika Chat Analytics & Configuration
 
 This guide explains how to set up a Supabase project to:
@@ -250,7 +249,6 @@ VALUES ('ad_settings_kruthika_chat_v1', '{
   "maxDirectLinkAdsPerSession": 3
 }');
 */
-```
 
 **Section 4: Grant Execute Permissions on Functions**
 ```sql
@@ -287,5 +285,3 @@ After setting environment variables, running SQL, and deploying any code changes
 *   **Other Supabase Issues:** Check browser console and Supabase logs.
 
 This setup moves towards a more secure admin panel. Remember to use strong, unique passwords and keep your Supabase project secure.
-
-    

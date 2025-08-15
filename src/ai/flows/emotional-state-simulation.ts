@@ -82,7 +82,7 @@ export async function generateResponse(input: EmotionalStateInput): Promise<Emot
 
     // Determine if proactive media should be sent (random chance or user request)
     const proactiveChance = 0.05; // 5% chance for proactive media on any turn
-    const shouldSendProactiveMedia = Math.random() < proactiveChance;
+    const shouldSendProactiveMedia = Math.random() < proactiveChanceance;
 
     if ((shouldSendProactiveMedia && (input.hasAvailableImages || input.hasAvailableAudio)) || (userRequestedImage && input.hasAvailableImages)) {
       // If user requested an image and images are available (checked via hasAvailableImages), prioritize sending an image

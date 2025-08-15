@@ -37,7 +37,7 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
   "Oops! My brain just went offline for a sec 🤪 Try again?",
   "Arre! Mera wifi thoda dramatic ho gaya. One more time?",
   "Technical difficulties! Par main hoon na tumhare saath 💪",
-  "Server mood swings chal rahe hain... but I'm here! 😊",
+  "Server mood swings chal rahe hain... but I'm here for you! 💕"e! 😊",
 
   // Ongoing, fresh-feeling responses
   "Abhi bhi nahi ho raha? Wait na, abhi kuch jugaad karti hoon...",
@@ -142,7 +142,7 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
     adLinkToShow = monetagLink;
   }
 
-  const isValidLink = (link: string | null | undefined): boolean => !!link && (link.startsWith('http://') || link.startsWith('https://')) && link !== DEFAULT_ADSTERRA_DIRECT_LINK && link !== DEFAULT_MONETAG_DIRECT_LINK && !link.toLowerCase().includes("placeholder");
+  const isValidLink = (link: string | null | undefined): boolean => !!link && (link.startsWith('http://') || link.startsWith('https://')) && link !== DEFAULT_ADSTERRA_DIRECT_LINK && link !== DEFAULT_MONETAG_DIRECT_LINK && !link.toLowerconst isPlaceholder = adLinkToShow.toLowerCase().includes("placeholder");
 
   if (!isValidLink(adLinkToShow)) {
     const originalNetworkAttempt = networkToTry;
@@ -160,6 +160,7 @@ export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean =
     }
     if (!isValidLink(adLinkToShow)) {
       console.warn(`Ad display: Fallback link for (${networkToTry}) is also invalid or default placeholder. No ad shown. Link: "${adLinkToShow}"`);
+      return false;}"`);
       return false;
     }
   }

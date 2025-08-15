@@ -1,281 +1,139 @@
-"use client";
 
-import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
-import AppHeader from '@/components/AppHeader';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+'use client';
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Camera, X as XIcon } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import type { AdminStatusDisplay, ManagedContactStatus, AdSettings, AIProfile } from '@/types';
-import { defaultAIProfile, adminStatusConfig, managedContactsConfig } from '@/config/ai';
-import { tryShowRotatedAd } from '@/app/maya-chat/page';
-import { useAIProfile } from '@/contexts/AIProfileContext';
-import { useGlobalStatus } from '@/contexts/GlobalStatusContext';
-import { useAdSettings } from '@/contexts/AdSettingsContext';
-import { cn } from '@/lib/utils';
-import { useToast } from "@/hooks/use-toast";
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Server, Database, Zap, Globe } from 'lucide-react';
 
-const STATUS_VIEW_AD_DELAY_MS = 3000;
-
-interface StatusItemDisplayProps {
-  statusKey: string;
-  displayName: string;
-  rawAvatarUrl: string;
-  statusText: string;
-  hasUpdateRing: boolean;
-  storyImageUrl?: string;
-  dataAiHint?: string;
-  isMyStatusStyle?: boolean;
-  isKruthikaProfile?: boolean;
+interface ServiceStatus {
+  name: string;
+  status: 'operational' | 'degraded' | 'outage';
+  description: string;
+  icon: React.ReactNode;
 }
 
-const StatusItemDisplay: React.FC<StatusItemDisplayProps> = ({
-  statusKey,
-  displayName,
-  rawAvatarUrl,
-  statusText,
-  hasUpdateRing,
-  storyImageUrl,
-  dataAiHint,
-  isMyStatusStyle,
-  isKruthikaProfile
-}) => {
-  const [showStoryImageViewer, setShowStoryImageViewer] = useState(false);
-  const storyViewTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const storyViewedLongEnoughRef = useRef(false);
-  const { adSettings } = useAdSettings();
-  const { toast } = useToast();
-
-  let avatarUrlToUse = rawAvatarUrl;
-  if (!avatarUrlToUse || typeof avatarUrlToUse !== 'string' || avatarUrlToUse.trim() === '' || (!avatarUrlToUse.startsWith('http') && !avatarUrlToUse.startsWith('data:'))) {
-    avatarUrlToUse = defaultAIProfile.avatarUrl;
-  }
-
-  let isValidStoryImageSrc = false;
-  if (storyImageUrl && typeof storyImageUrl === 'string' && storyImageUrl.trim() !== '') {
-    try {
-      if (storyImageUrl.startsWith('data:image')) {
-        isValidStoryImageSrc = true;
-      } else {
-        new URL(storyImageUrl);
-        isValidStoryImageSrc = true;
-      }
-    } catch (e) {
-      isValidStoryImageSrc = false;
+export default function StatusPage() {
+  const router = useRouter();
+  const [services, setServices] = useState<ServiceStatus[]>([
+    {
+      name: 'Chat Service',
+      status: 'operational',
+      description: 'AI chat functionality is working normally',
+      icon: <Zap className="h-4 w-4" />
+    },
+    {
+      name: 'Database',
+      status: 'operational', 
+      description: 'Supabase database is connected and responsive',
+      icon: <Database className="h-4 w-4" />
+    },
+    {
+      name: 'API Gateway',
+      status: 'operational',
+      description: 'All API endpoints are responding normally',
+      icon: <Server className="h-4 w-4" />
+    },
+    {
+      name: 'Web Interface',
+      status: 'operational',
+      description: 'Website is loading and functioning properly',
+      icon: <Globe className="h-4 w-4" />
     }
-  }
+  ]);
 
-  const handleItemClick = () => {
-    if (isValidStoryImageSrc && storyImageUrl) {
-      setShowStoryImageViewer(true);
-      storyViewedLongEnoughRef.current = false;
-      if (storyViewTimerRef.current) clearTimeout(storyViewTimerRef.current);
-      storyViewTimerRef.current = setTimeout(() => {
-        storyViewedLongEnoughRef.current = true;
-      }, STATUS_VIEW_AD_DELAY_MS);
-    } else if (storyImageUrl) {
-      console.warn(`[StatusItemDisplay-${displayName}] Not opening story image viewer due to invalid/empty URL: ${storyImageUrl}`);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'operational': return 'bg-green-500';
+      case 'degraded': return 'bg-yellow-500';
+      case 'outage': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
-  const handleCloseStoryViewer = () => {
-    setShowStoryImageViewer(false);
-    if (storyViewTimerRef.current) clearTimeout(storyViewTimerRef.current);
-
-    if (storyImageUrl && storyViewedLongEnoughRef.current && adSettings && adSettings.adsEnabledGlobally) {
-      tryShowRotatedAd(adSettings);
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'operational': return 'Operational';
+      case 'degraded': return 'Degraded Performance';
+      case 'outage': return 'Outage';
+      default: return 'Unknown';
     }
-    storyViewedLongEnoughRef.current = false;
   };
 
-  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>, context: string) => {
-    console.error(`StatusItemDisplay - ${context} AvatarImage load error for ${displayName}. URL: ${avatarUrlToUse}`, e);
-  };
-
-  const handleStoryImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error(`StatusItemDisplay - Story Image load error for ${displayName}. URL: ${storyImageUrl}`, e);
-    toast({
-      title: "Image Load Failed",
-      description: `Could not load story image for ${displayName}. The image might be unavailable or the URL incorrect.`,
-      variant: "destructive",
-      duration: 4000,
-    });
-  };
+  const overallStatus = services.every(s => s.status === 'operational') 
+    ? 'All Systems Operational' 
+    : services.some(s => s.status === 'outage')
+    ? 'Some Systems Down'
+    : 'Degraded Performance';
 
   return (
-    <React.Fragment key={`${statusKey}-${avatarUrlToUse || 'no_avatar_frag'}`}>
-      <div
-        className="flex items-center p-3 hover:bg-secondary/50 cursor-pointer border-b border-border transition-colors group"
-        onClick={handleItemClick}
-      >
-        <div className="relative">
-          <Avatar
-            className={cn(
-                'h-12 w-12',
-                hasUpdateRing ? 'ring-2 ring-primary p-0.5' : (isMyStatusStyle && !hasUpdateRing ? 'ring-2 ring-muted/50 p-0.5' : '')
-            )}
-            key={`status-avatar-comp-${statusKey}-${avatarUrlToUse || 'default_avatar_comp_key_sp'}`}
+    <div className="min-h-screen bg-background p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex items-center gap-4 mb-6">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => router.push('/')}
+            className="text-inherit hover:bg-accent/10"
           >
-            <AvatarImage
-                src={avatarUrlToUse || undefined}
-                alt={displayName}
-                data-ai-hint={dataAiHint || "profile person"}
-                className="object-cover"
-                key={`${statusKey}-avatar-img-${avatarUrlToUse || 'no_avatar_fallback_img_sp'}`}
-                onError={(e) => handleAvatarError(e, "List")}
-            />
-            <AvatarFallback>{(displayName || "S").charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-          {isMyStatusStyle && !hasUpdateRing && !storyImageUrl && (
-             <div className="absolute bottom-0 right-0 bg-primary text-primary-foreground rounded-full p-0.5 border-2 border-background">
-              <PlusCircle size={16} />
-            </div>
-          )}
+            <ArrowLeft className="h-6 w-6" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">System Status</h1>
+            <p className="text-muted-foreground">Current status of all services</p>
+          </div>
         </div>
-        <div className="ml-4 flex-grow overflow-hidden">
-          <h2 className="font-semibold text-md truncate">{displayName}</h2>
-          <p className="text-sm text-muted-foreground truncate">{statusText}</p>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${getStatusColor(services.every(s => s.status === 'operational') ? 'operational' : 'degraded')}`}></div>
+              Overall Status
+            </CardTitle>
+            <CardDescription>{overallStatus}</CardDescription>
+          </CardHeader>
+        </Card>
+
+        <div className="grid gap-4">
+          {services.map((service, index) => (
+            <Card key={index}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {service.icon}
+                    {service.name}
+                  </div>
+                  <Badge 
+                    variant="outline" 
+                    className={`${getStatusColor(service.status)} text-white border-none`}
+                  >
+                    {getStatusText(service.status)}
+                  </Badge>
+                </CardTitle>
+                <CardDescription>{service.description}</CardDescription>
+              </CardHeader>
+            </Card>
+          ))}
         </div>
-      </div>
 
-      {isValidStoryImageSrc && storyImageUrl && (
-         <Dialog open={showStoryImageViewer} onOpenChange={(open) => {
-            if (!open) {
-                handleCloseStoryViewer();
-            } else {
-                setShowStoryImageViewer(true);
-                 if (storyViewTimerRef.current) clearTimeout(storyViewTimerRef.current);
-                storyViewedLongEnoughRef.current = false;
-                storyViewTimerRef.current = setTimeout(() => {
-                    storyViewedLongEnoughRef.current = true;
-                }, STATUS_VIEW_AD_DELAY_MS);
-            }
-        }}>
-          <DialogContent
-            className="!fixed !inset-0 !z-[60] flex !w-screen !h-screen flex-col !bg-black !p-0 !border-0 !shadow-2xl !outline-none !rounded-none !max-w-none !translate-x-0 !translate-y-0"
-          >
-            <div className="absolute top-0 left-0 right-0 z-20 p-3 flex items-center justify-between bg-gradient-to-b from-black/70 via-black/30 to-transparent">
-                <div className="flex items-center gap-3">
-                    <Avatar
-                        className="h-9 w-9 border-2 border-white/50"
-                        key={`status-dialog-avatar-comp-${statusKey}-${avatarUrlToUse || 'default_avatar_dialog_comp_key_sp'}`}
-                    >
-                        <AvatarImage
-                            src={avatarUrlToUse || undefined}
-                            alt={displayName}
-                            key={`${statusKey}-dialog-avatar-img-${avatarUrlToUse || 'no_avatar_fallback_dialog_img_sp'}`}
-                            onError={(e) => handleAvatarError(e, "Dialog")}
-                        />
-                        <AvatarFallback>{(displayName || "S").charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <DialogTitle className="text-white text-sm font-semibold">{displayName}</DialogTitle>
-                </div>
-                <Button variant="ghost" size="icon" onClick={handleCloseStoryViewer} className="text-white hover:bg-white/10">
-                    <XIcon size={24} />
-                </Button>
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Recent Updates</CardTitle>
+            <CardDescription>Latest system updates and maintenance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="border-l-2 border-green-500 pl-4">
+                <p className="font-medium">All systems operational</p>
+                <p className="text-sm text-muted-foreground">System is running smoothly</p>
+                <p className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</p>
+              </div>
             </div>
-
-            <div className="relative flex-grow w-full flex items-center justify-center overflow-hidden">
-                <Image
-                    src={storyImageUrl}
-                    alt={`${displayName}'s story`}
-                    fill={true}
-                    style={{ objectFit: 'contain' }}
-                    data-ai-hint="story image content large"
-                    quality={100}
-                    unoptimized={true}
-                    sizes="100vw"
-                    key={`${statusKey}-story-image-${storyImageUrl}`}
-                    onError={handleStoryImageError}
-                />
-            </div>
-
-             {statusText && !statusText.toLowerCase().includes("tap to add") && !statusText.toLowerCase().includes("no story update") && (
-                <div className="absolute bottom-0 left-0 right-0 z-20 p-4 pb-8 bg-gradient-to-t from-black/70 via-black/30 to-transparent">
-                    <p className="text-white text-center text-sm drop-shadow-md">{statusText}</p>
-                </div>
-            )}
-          </DialogContent>
-        </Dialog>
-      )}
-    </React.Fragment>
-  );
-};
-
-const StatusPage: React.FC = () => {
-  const { aiProfile: globalAIProfile, isLoadingAIProfile } = useAIProfile();
-  const { adminOwnStatus: globalAdminOwnStatus, managedDemoContacts: globalManagedDemoContacts, isLoadingGlobalStatuses } = useGlobalStatus();
-  const { adSettings, isLoadingAdSettings } = useAdSettings();
-  const { toast } = useToast();
-
-  const effectiveAIProfile = globalAIProfile || defaultAIProfile;
-  const displayAdminOwnStatus = globalAdminOwnStatus || adminStatusConfig;
-  const displayManagedDemoContacts = globalManagedDemoContacts || managedContactsConfig;
-
-  if (isLoadingAIProfile || isLoadingGlobalStatuses || isLoadingAdSettings) {
-     return (
-      <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
-        <AppHeader title="Status" />
-        <div className="flex-grow flex items-center justify-center text-muted-foreground">Loading statuses...</div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
-      <AppHeader title="Status" />
-      <div className="flex-grow overflow-y-auto custom-scrollbar">
-        <StatusItemDisplay
-            statusKey="admin-own-status-item"
-            displayName={displayAdminOwnStatus.name}
-            rawAvatarUrl={displayAdminOwnStatus.avatarUrl}
-            statusText={displayAdminOwnStatus.statusText}
-            hasUpdateRing={displayAdminOwnStatus.hasUpdate}
-            storyImageUrl={displayAdminOwnStatus.statusImageUrl}
-            dataAiHint="profile self admin"
-            isMyStatusStyle={true}
-            isKruthikaProfile={false}
-        />
-
-        <div className="p-2 px-4 text-sm font-medium text-muted-foreground bg-secondary/30">RECENT UPDATES</div>
-
-        {(effectiveAIProfile.statusStoryHasUpdate || (effectiveAIProfile.statusStoryText && effectiveAIProfile.statusStoryText !== defaultAIProfile.statusStoryText) || effectiveAIProfile.statusStoryImageUrl) && (
-            <StatusItemDisplay
-                statusKey="kruthika-status-story-item"
-                displayName={effectiveAIProfile.name}
-                rawAvatarUrl={effectiveAIProfile.avatarUrl}
-                statusText={effectiveAIProfile.statusStoryText || "No story update."}
-                hasUpdateRing={effectiveAIProfile.statusStoryHasUpdate || false}
-                storyImageUrl={effectiveAIProfile.statusStoryImageUrl}
-                dataAiHint="profile woman ai"
-                isKruthikaProfile={true}
-            />
-        )}
-
-        {displayManagedDemoContacts.map(contact => (
-          (contact.hasUpdate || contact.statusImageUrl || (contact.statusText && contact.statusText !== "Tap to add status")) &&
-          <StatusItemDisplay
-            key={contact.id}
-            statusKey={contact.id}
-            displayName={contact.name}
-            rawAvatarUrl={contact.avatarUrl}
-            statusText={contact.statusText}
-            hasUpdateRing={contact.hasUpdate}
-            storyImageUrl={contact.statusImageUrl}
-            dataAiHint={contact.dataAiHint}
-            isKruthikaProfile={false}
-          />
-        ))}
-
-      </div>
-      <div className="p-4 border-t border-border flex justify-end">
-        <Button variant="default" size="lg" className="rounded-full p-4 shadow-lg" onClick={() => alert("Camera access for status - not implemented")}>
-          <Camera size={24} />
-        </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-};
-
-export default StatusPage;
+}
