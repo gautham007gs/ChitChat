@@ -62,6 +62,9 @@ export const avatarOptions: AvatarOption[] = [
   }
 ];
 
+// Export with alternative name for compatibility
+export const availableAvatars = avatarOptions;
+
 export const defaultAIProfile: AIProfile = {
   name: "Maya",
   description: "Your friendly AI companion who loves to chat about anything and everything!",
@@ -89,7 +92,39 @@ export const managedContactStatus: ManagedContactStatus = {
   showCustomStatus: true,
 };
 
-const DEFAULT_ADSTERRA_DIRECT_LINK = "https://www.profitablecpmnetwork.com/g8nhym4yg?key=2b71bf819cb8c5c7f8e011b7b75ea097";
+// Export the admin status display settings with the expected name
+export const defaultAdminStatusDisplay: AdminStatusDisplay = {
+  id: "admin-status-001",
+  name: "Admin",
+  avatarUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+  statusText: "Currently online and ready to help! 💬✨",
+  hasUpdate: true,
+  statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
+};
+
+// Export the managed demo contacts with the expected name  
+export const defaultManagedContactStatuses: ManagedContactStatus[] = [
+  {
+    id: "demo-contact-001",
+    name: "Sarah",
+    avatarUrl: "https://i.imghippo.com/files/xSVJr1736067554.png",
+    statusText: "Having a great day! ☀️",
+    hasUpdate: true,
+    dataAiHint: "friendly woman profile",
+    statusImageUrl: "https://i.imghippo.com/files/xSVJr1736067554.png"
+  },
+  {
+    id: "demo-contact-002", 
+    name: "Alex",
+    avatarUrl: "https://i.imghippo.com/files/OdYRR1736067647.png",
+    statusText: "Working on exciting projects! 🚀",
+    hasUpdate: false,
+    dataAiHint: "professional person profile"
+  }
+];
+
+export const DEFAULT_ADSTERRA_DIRECT_LINK = "https://www.profitablecpmnetwork.com/g8nhym4yg?key=2b71bf819cb8c5c7f8e011b7b75ea097";
+export const DEFAULT_MONETAG_DIRECT_LINK = "https://example.com/monetag";
 
 export const defaultAdSettings: AdSettings = {
   adsEnabledGlobally: true,
@@ -102,28 +137,47 @@ export const defaultAdSettings: AdSettings = {
   adsterraNativeBannerEnabled: false,
   adsterraSocialBarCode: "<!-- Adsterra Social Bar Code Placeholder -->",
   adsterraSocialBarEnabled: true,
+  adsterraPopunderCode: "<!-- Adsterra Popunder Code Placeholder -->",
+  adsterraPopunderEnabled: false,
+  
+  monetagDirectLink: DEFAULT_MONETAG_DIRECT_LINK,
+  monetagDirectLinkEnabled: false,
+  monetagBannerCode: "<!-- Monetag Banner Code Placeholder -->",
+  monetagBannerEnabled: false,
+  monetagNativeBannerCode: "<!-- Monetag Native Banner Code Placeholder -->",
+  monetagNativeBannerEnabled: false,
+  monetagSocialBarCode: "<!-- Monetag Social Bar Code Placeholder -->",
+  monetagSocialBarEnabled: false,
+  monetagPopunderCode: "<!-- Monetag Popunder Code Placeholder -->",
+  monetagPopunderEnabled: false,
+
+  maxDirectLinkAdsPerDay: 10,
+  maxDirectLinkAdsPerSession: 3,
+  messagesPerAdTrigger: 5,
+  inactivityAdTimeoutMs: 30000,
+  inactivityAdChance: 0.3,
+  userMediaInterstitialChance: 0.2
 };
 
 export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
-  // Audio assets
-  messageSentSoundEnabled: true,
-  messageReceivedSoundEnabled: true,
-  messageSentSoundUrl: "/media/message-sent.mp3",
-  messageReceivedSoundUrl: "/media/message-received.mp3",
-  
-  // Visual assets
-  chatBackgroundImageEnabled: false,
-  chatBackgroundImageUrl: "/chat-bg.png",
-  customEmojiEnabled: false,
-  customEmojiSetUrl: "",
-  
-  // Animation settings
-  enableTypingAnimation: true,
-  enableMessageAnimations: true,
-  animationSpeed: "normal",
-  
-  // Theme settings
-  darkModeEnabled: true,
-  primaryColor: "#3b82f6",
-  accentColor: "#10b981",
+  assets: [
+    {
+      id: "default-sent-sound",
+      type: "audio",
+      url: "/media/message-sent.mp3",
+      description: "Default message sent sound"
+    },
+    {
+      id: "default-received-sound", 
+      type: "audio",
+      url: "/media/message-received.mp3",
+      description: "Default message received sound"
+    },
+    {
+      id: "default-bg-image",
+      type: "image",
+      url: "/chat-bg.png", 
+      description: "Default chat background image"
+    }
+  ]
 };
