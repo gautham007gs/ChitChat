@@ -33,7 +33,7 @@ export const AdSettingsProvider: React.FC<{ children: ReactNode }> = ({ children
       const { data, error } = await supabase
         .from('app_configurations')
         .select('settings')
-        .eq('config_type', 'ad_settings') // Changed eq condition from 'id' to 'config_type'
+        .eq('id', 'ad_settings_kruthika_chat_v1')
         .single();
 
       if (error) {

@@ -1,7 +1,8 @@
 "use client";
 
+import React from 'react';
 import type { NextPage } from 'next';
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatView from '@/components/chat/ChatView';

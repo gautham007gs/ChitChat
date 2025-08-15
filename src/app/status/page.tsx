@@ -1,134 +1,83 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Server, Database, Zap, Globe } from 'lucide-react';
-
-interface ServiceStatus {
-  name: string;
-  status: 'operational' | 'degraded' | 'outage';
-  description: string;
-  icon: React.ReactNode;
-}
+import React from 'react';
+import { useAIProfile } from '@/contexts/AIProfileContext';
+import { Card, CardContent } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export default function StatusPage() {
-  const router = useRouter();
-  const [services, setServices] = useState<ServiceStatus[]>([
-    {
-      name: 'Chat Service',
-      status: 'operational',
-      description: 'AI chat functionality is working normally',
-      icon: <Zap className="h-4 w-4" />
-    },
-    {
-      name: 'Database',
-      status: 'operational', 
-      description: 'Supabase database is connected and responsive',
-      icon: <Database className="h-4 w-4" />
-    },
-    {
-      name: 'API Gateway',
-      status: 'operational',
-      description: 'All API endpoints are responding normally',
-      icon: <Server className="h-4 w-4" />
-    },
-    {
-      name: 'Web Interface',
-      status: 'operational',
-      description: 'Website is loading and functioning properly',
-      icon: <Globe className="h-4 w-4" />
-    }
-  ]);
+  const { aiProfile, isLoadingAIProfile } = useAIProfile();
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'operational': return 'bg-green-500';
-      case 'degraded': return 'bg-yellow-500';
-      case 'outage': return 'bg-red-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'operational': return 'Operational';
-      case 'degraded': return 'Degraded Performance';
-      case 'outage': return 'Outage';
-      default: return 'Unknown';
-    }
-  };
-
-  const overallStatus = services.every(s => s.status === 'operational') 
-    ? 'All Systems Operational' 
-    : services.some(s => s.status === 'outage')
-    ? 'Some Systems Down'
-    : 'Degraded Performance';
+  if (isLoadingAIProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading status...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-4 mb-6">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => router.push('/')}
-            className="text-inherit hover:bg-accent/10"
-          >
-            <ArrowLeft className="h-6 w-6" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold">System Status</h1>
-            <p className="text-muted-foreground">Current status of all services</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-pink-100 to-purple-100 p-4">
+      <div className="max-w-md mx-auto">
+        <Card className="bg-white/80 backdrop-blur-sm shadow-xl">
+          <CardContent className="p-6">
+            <div className="text-center mb-6">
+              <Avatar className="w-24 h-24 mx-auto mb-4 ring-4 ring-pink-200">
+                <AvatarImage 
+                  src={aiProfile?.avatarUrl} 
+                  alt={aiProfile?.name || 'Profile'} 
+                />
+                <AvatarFallback className="text-2xl bg-pink-200">
+                  {aiProfile?.name?.[0] || 'K'}
+                </AvatarFallback>
+              </Avatar>
+              
+              <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                {aiProfile?.name || 'Kruthika'}
+              </h1>
+              
+              <Badge variant="secondary" className="mb-4 bg-green-100 text-green-700">
+                ● Online
+              </Badge>
+            </div>
 
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <div className={`w-3 h-3 rounded-full ${getStatusColor(services.every(s => s.status === 'operational') ? 'operational' : 'degraded')}`}></div>
-              Overall Status
-            </CardTitle>
-            <CardDescription>{overallStatus}</CardDescription>
-          </CardHeader>
-        </Card>
-
-        <div className="grid gap-4">
-          {services.map((service, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {service.icon}
-                    {service.name}
-                  </div>
-                  <Badge 
-                    variant="outline" 
-                    className={`${getStatusColor(service.status)} text-white border-none`}
-                  >
-                    {getStatusText(service.status)}
-                  </Badge>
-                </CardTitle>
-                <CardDescription>{service.description}</CardDescription>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Recent Updates</CardTitle>
-            <CardDescription>Latest system updates and maintenance</CardDescription>
-          </CardHeader>
-          <CardContent>
             <div className="space-y-4">
-              <div className="border-l-2 border-green-500 pl-4">
-                <p className="font-medium">All systems operational</p>
-                <p className="text-sm text-muted-foreground">System is running smoothly</p>
-                <p className="text-xs text-muted-foreground">{new Date().toLocaleDateString()}</p>
+              <div className="text-center">
+                <p className="text-lg text-gray-700 mb-2">
+                  {aiProfile?.status || '🌸 Living my best life! Let\'s chat! 🌸'}
+                </p>
+              </div>
+
+              {aiProfile?.statusStoryImageUrl && (
+                <div className="rounded-lg overflow-hidden">
+                  <img 
+                    src={aiProfile.statusStoryImageUrl} 
+                    alt="Status story" 
+                    className="w-full h-48 object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="text-center">
+                <p className="text-gray-600">
+                  {aiProfile?.statusStoryText || 'Ask me anything! 💬'}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-gray-200">
+                <div className="flex justify-center">
+                  <a 
+                    href="/maya-chat"
+                    className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-full font-medium transition-colors duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    💬 Start Chat
+                  </a>
+                </div>
               </div>
             </div>
           </CardContent>
