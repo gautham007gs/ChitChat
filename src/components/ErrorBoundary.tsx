@@ -13,6 +13,18 @@ interface State {
   error?: Error;
 }
 
+import React from 'react';
+
+interface Props {
+  children: React.ReactNode;
+  fallback?: React.ComponentType<{ error?: Error }>;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
 class ErrorBoundary extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -59,4 +71,4 @@ class ErrorBoundary extends React.Component<Props, State> {
   }
 }
 
-export default ErrorBoundary;
+export default ErrorBoundary;ry;

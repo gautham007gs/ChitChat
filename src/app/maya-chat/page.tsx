@@ -995,7 +995,7 @@ Reply as Maya would - short, sweet, and loving:`;
                 )}
               </div>
 
-              <DialogFooter className="p-3 bg-neutral-800/80 backdrop-blur-sm flex flex-row justify-around items-center border-t border-neutral-700 sticky bottom-0 z-10 mt-auto">
+              <DialogFooter className="p-3 bg-neutral-800/80 backdrop-blur-sm sticky bottom-0 z-10 mt-auto">
                 <Button variant="ghost" size="icon" className="text-neutral-200 hover:text-white hover:bg-neutral-700/70 flex flex-col items-center h-auto p-2" onClick={() => setShowZoomedAvatarDialog(false)}>
                   <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
                   <span className="text-xs mt-1">Message</span>
