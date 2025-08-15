@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Eye, Heart, MessageCircle } from 'lucide-react';
+import { ArrowLeft, Eye, Heart, MessageCircle, MoreVertical, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import AppHeader from '@/components/AppHeader';
 import Image from 'next/image';
@@ -15,11 +15,12 @@ import Image from 'next/image';
 export default function StatusPage() {
   const { aiProfile, isLoadingAIProfile } = useAIProfile();
   const router = useRouter();
-  const [timeAgo, setTimeAgo] = useState('2h');
+  const [timeAgo, setTimeAgo] = useState('2h ago');
+  const [viewingStory, setViewingStory] = useState(false);
 
   useEffect(() => {
     // Simulate different time stamps
-    const times = ['1h', '2h', '3h', '5h', '1d'];
+    const times = ['1h ago', '2h ago', '3h ago', '5h ago', '1d ago'];
     setTimeAgo(times[Math.floor(Math.random() * times.length)]);
   }, []);
 
@@ -37,135 +38,161 @@ export default function StatusPage() {
     );
   }
 
-  const statusStories = [
-    {
-      id: 1,
-      user: aiProfile?.name || 'Kruthika',
-      avatar: aiProfile?.avatarUrl || '',
-      time: timeAgo,
-      image: aiProfile?.statusStoryImageUrl || '',
-      text: aiProfile?.statusStoryText || aiProfile?.status || '🌸 Living my best life! Let\'s chat! 🌸',
-      views: Math.floor(Math.random() * 50) + 10,
-      isOwn: true
-    }
-  ];
+  const displayName = aiProfile?.name || 'Maya';
+  const displayAvatar = aiProfile?.avatarUrl || 'https://i.postimg.cc/52S3BZrM/images-10.jpg';
+  const displayStatus = aiProfile?.status || '🌸 Living my best life! Let\'s chat! 🌸';
+
+  if (viewingStory) {
+    return (
+      <div className="flex flex-col h-screen max-w-3xl mx-auto bg-black relative overflow-hidden">
+        {/* Story Progress Bar */}
+        <div className="absolute top-4 left-4 right-4 z-20">
+          <div className="h-1 bg-gray-600 rounded-full overflow-hidden">
+            <div className="h-full bg-white rounded-full animate-pulse" style={{ width: '60%' }}></div>
+          </div>
+        </div>
+
+        {/* Story Header */}
+        <div className="absolute top-8 left-4 right-4 z-20 flex items-center justify-between pt-4">
+          <div className="flex items-center space-x-3">
+            <Avatar className="h-10 w-10 border-2 border-white">
+              <AvatarImage src={displayAvatar} alt={displayName} />
+              <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-600 text-white font-semibold">
+                {displayName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-white font-semibold text-sm">{displayName}</p>
+              <p className="text-white/80 text-xs">{timeAgo}</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <MoreVertical className="h-5 w-5 text-white" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setViewingStory(false)}
+              className="text-white hover:bg-white/20"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Story Image */}
+        <div className="flex-1 relative">
+          <Image
+            src={displayAvatar}
+            alt="Story"
+            fill
+            className="object-cover"
+            priority
+          />
+          
+          {/* Story Text Overlay */}
+          <div className="absolute bottom-20 left-6 right-6 z-10">
+            <div className="bg-black/60 backdrop-blur-sm rounded-2xl p-4">
+              <p className="text-white text-lg font-medium text-center">
+                {displayStatus}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Story Actions */}
+        <div className="absolute bottom-6 left-6 right-6 z-20">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button size="sm" variant="ghost" className="text-white hover:bg-white/20">
+                <Heart className="h-5 w-5 mr-2" />
+                Like
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="text-white hover:bg-white/20"
+                onClick={() => router.push('/maya-chat')}
+              >
+                <MessageCircle className="h-5 w-5 mr-2" />
+                Reply
+              </Button>
+            </div>
+            <div className="flex items-center space-x-2 text-white/80 text-sm">
+              <Eye className="h-4 w-4" />
+              <span>127</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
+    <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background">
       <AppHeader title="Status" />
       
-      <div className="flex-grow overflow-y-auto custom-scrollbar">
-        <div className="p-4 space-y-4">
-          {/* My Status Section */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold mb-3 text-foreground">Recent updates</h2>
-            
-            {statusStories.map((story) => (
-              <Card key={story.id} className="bg-card border-border overflow-hidden">
-                <CardContent className="p-0">
-                  {/* Header */}
-                  <div className="flex items-center justify-between p-4 pb-2">
-                    <div className="flex items-center space-x-3">
-                      <div className="relative">
-                        <Avatar className="h-10 w-10 ring-2 ring-primary ring-offset-2">
-                          <AvatarImage src={story.avatar} alt={story.user} />
-                          <AvatarFallback className="bg-primary text-primary-foreground">
-                            {story.user[0]?.toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {story.isOwn && (
-                          <div className="absolute -bottom-1 -right-1 bg-primary rounded-full p-1">
-                            <div className="w-2 h-2 bg-background rounded-full"></div>
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-foreground">{story.user}</h3>
-                        <p className="text-sm text-muted-foreground">{story.time} ago</p>
-                      </div>
+      <div className="flex-1 p-4 space-y-6">
+        {/* My Status Section */}
+        <div>
+          <h2 className="text-lg font-semibold mb-3 text-muted-foreground">Recent updates</h2>
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setViewingStory(true)}>
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Avatar className="h-16 w-16 ring-2 ring-green-500 ring-offset-2">
+                    <AvatarImage src={displayAvatar} alt={displayName} />
+                    <AvatarFallback className="bg-gradient-to-br from-pink-400 to-purple-600 text-white font-semibold text-lg">
+                      {displayName.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <Badge className="absolute -bottom-1 -right-1 bg-green-500 text-white px-1.5 py-0.5 text-xs">
+                    New
+                  </Badge>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold text-lg truncate">{displayName}</h3>
+                    <span className="text-sm text-muted-foreground">{timeAgo}</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+                    {displayStatus}
+                  </p>
+                  <div className="flex items-center space-x-4 mt-2">
+                    <div className="flex items-center space-x-1 text-muted-foreground text-xs">
+                      <Eye className="h-4 w-4" />
+                      <span>127 views</span>
                     </div>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700">
-                      ● Online
+                    <Badge variant="secondary" className="text-xs">
+                      Tap to view
                     </Badge>
                   </div>
-
-                  {/* Status Image */}
-                  {story.image && (
-                    <div className="relative w-full h-64 bg-black">
-                      <Image
-                        src={story.image}
-                        alt="Status"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  )}
-
-                  {/* Status Text */}
-                  <div className="p-4">
-                    <p className="text-foreground mb-3">{story.text}</p>
-                    
-                    {/* Status Stats */}
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-1">
-                          <Eye className="h-4 w-4" />
-                          <span>{story.views}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Heart className="h-4 w-4" />
-                          <span>{Math.floor(story.views * 0.3)}</span>
-                        </div>
-                      </div>
-                      <div className="text-xs">
-                        Today {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="px-4 pb-4 pt-2 border-t border-border">
-                    <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                        onClick={() => router.push('/maya-chat')}
-                      >
-                        <MessageCircle className="h-4 w-4 mr-1" />
-                        Reply
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="px-3"
-                      >
-                        <Heart className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Call to Action */}
-          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="p-6 text-center">
-              <h3 className="text-lg font-semibold mb-2 text-foreground">Start a conversation!</h3>
-              <p className="text-muted-foreground mb-4">
-                {aiProfile?.name} is online and ready to chat with you.
-              </p>
-              <Button 
-                onClick={() => router.push('/maya-chat')}
-                className="bg-primary hover:bg-primary/90"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Chat Now
-              </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Chat Button */}
+        <div className="flex justify-center">
+          <Button 
+            onClick={() => router.push('/maya-chat')}
+            className="bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200"
+          >
+            <MessageCircle className="h-5 w-5 mr-2" />
+            Start Chatting with {displayName}
+          </Button>
+        </div>
+
+        {/* Empty State for Other Status */}
+        <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
+          <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
+            <Eye className="h-12 w-12 text-muted-foreground/50" />
+          </div>
+          <h3 className="text-lg font-medium mb-2">No other status updates</h3>
+          <p className="text-muted-foreground text-sm max-w-sm">
+            When your friends post status updates, you'll see them here.
+          </p>
         </div>
       </div>
     </div>
