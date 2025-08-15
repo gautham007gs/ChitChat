@@ -29,8 +29,13 @@ const nextConfig = {
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
+      // Ensure splitChunks is properly configured
+      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
+        config.optimization.splitChunks = {};
+      }
+      
       config.optimization.splitChunks.cacheGroups = {
-        ...config.optimization.splitChunks.cacheGroups,
+        ...(config.optimization.splitChunks.cacheGroups || {}),
         default: false,
         vendors: false,
         // Prevent chunk loading issues
