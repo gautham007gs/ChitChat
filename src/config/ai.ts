@@ -35,33 +35,37 @@ export const defaultAdSettings: AdSettings = {
   adsEnabledGlobally: true,
   
   adsterraDirectLink: DEFAULT_ADSTERRA_DIRECT_LINK,
-  adsterraDirectLinkEnabled: true,
-  adsterraBannerCode: "<!-- Adsterra Banner Code Placeholder: Paste full script here -->",
-  adsterraBannerEnabled: false,
-  adsterraNativeBannerCode: "<!-- Adsterra Native Banner Code Placeholder: Paste full script here -->",
+  adsterraDirectLinkEnabled: true, // REMINDER: Replace with your actual Adsterra Direct Link
+  adsterraBannerCode: "<!-- Adsterra Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Banner Code
+  adsterraBannerEnabled: false, 
+  adsterraNativeBannerCode: "<!-- Adsterra Native Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Native Banner Code
   adsterraNativeBannerEnabled: false,
-  adsterraSocialBarCode: "<!-- Adsterra Social Bar Code Placeholder: Paste full script here -->",
+  adsterraSocialBarCode: "<!-- Adsterra Social Bar Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Social Bar Code
   adsterraSocialBarEnabled: false,
-  adsterraPopunderCode: "<!-- Adsterra Pop-under Script Placeholder: Paste full script here -->",
+  adsterraPopunderCode: "<!-- Adsterra Pop-under Script Placeholder: Paste full script here -->", // REMINDER: Replace with actual Adsterra Pop-under Code
   adsterraPopunderEnabled: false,
 
   monetagDirectLink: DEFAULT_MONETAG_DIRECT_LINK,
-  monetagDirectLinkEnabled: true,
-  monetagBannerCode: "<!-- Monetag Banner Code Placeholder: Paste full script here -->",
+  monetagDirectLinkEnabled: true, // REMINDER: Replace with your actual Monetag Direct Link
+  monetagBannerCode: "<!-- Monetag Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Banner Code
   monetagBannerEnabled: false,
-  monetagNativeBannerCode: "<!-- Monetag Native Banner Code Placeholder: Paste full script here -->",
+  monetagNativeBannerCode: "<!-- Monetag Native Banner Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Native Banner Code
   monetagNativeBannerEnabled: false,
-  monetagSocialBarCode: "<!-- Monetag Social Bar Code Placeholder: Paste full script here -->",
+  monetagSocialBarCode: "<!-- Monetag Social Bar Code Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Social Bar Code
   monetagSocialBarEnabled: false,
-  monetagPopunderCode: "<!-- Monetag Pop-under Script Placeholder: Paste full script here -->",
+  monetagPopunderCode: "<!-- Monetag Pop-under Script Placeholder: Paste full script here -->", // REMINDER: Replace with actual Monetag Pop-under Code
   monetagPopunderEnabled: false,
 
   maxDirectLinkAdsPerDay: 6, // Default based on our previous discussion
   maxDirectLinkAdsPerSession: 3, // Default based on our previous discussion
+  inactivityAdTimeoutMs: 60000, // Added default value (1 minute)
+  inactivityAdChance: 0.2, // Added default value (20%)
+  userMediaInterstitialChance: 0.3, // Added default value (30%)
 };
 
 // Default configuration for AI's sharable media assets.
 // Images: URLs must be publicly accessible.
+// REMINDER: Populate the 'assets' array with actual media URLs/paths for the AI to share.
 // Audio: Place files in `public/media/` and use paths like '/media/filename.mp3'.
 export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
   assets: [

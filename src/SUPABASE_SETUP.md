@@ -84,10 +84,13 @@ ON public.messages_log
 FOR SELECT
 USING (true); -- DANGER: If admin panel isn't secured, this is open.
 
+
 -- Create a PostgreSQL function to get daily message counts (user and AI)
 CREATE OR REPLACE FUNCTION get_daily_message_counts(start_date DATE)
 RETURNS TABLE(date DATE, messages BIGINT)
 LANGUAGE plpgsql
+SECURITY DEFINER -- Use SECURITY DEFINER if you need to access tables with restricted RLS from this function.
+-- If not needed, use SECURITY INVOKER (default) or omit.
 AS $$
 BEGIN
   RETURN QUERY
@@ -131,6 +134,8 @@ CREATE OR REPLACE FUNCTION get_daily_active_user_counts(start_date DATE)
 RETURNS TABLE(date DATE, active_users BIGINT)
 LANGUAGE plpgsql
 AS $$
+SECURITY DEFINER -- Use SECURITY DEFINER if you need to access tables with restricted RLS from this function.
+-- If not needed, use SECURITY INVOKER (default) or omit.
 BEGIN
   RETURN QUERY
   SELECT
@@ -162,6 +167,7 @@ CREATE POLICY "Allow anon reads for app configurations"
 ON public.app_configurations
 FOR SELECT
 USING (true);
+
 
 -- !! CRITICAL - SECURE WRITE ACCESS TO APP CONFIGURATIONS !!
 -- Remove or disable the "PROTOTYPE ONLY" INSERT and UPDATE policies below.

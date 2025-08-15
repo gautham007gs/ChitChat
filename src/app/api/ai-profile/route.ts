@@ -15,11 +15,13 @@ import type { NextRequest } from 'next/server';
 
 // Example: GET request to fetch the profile (not implemented)
 export async function GET(request: NextRequest) {
+  // TODO: Implement logic to fetch AI profile from a backend data store here.
+  // Given other project files, this would likely involve fetching from Supabase
+  // using supabase.from('app_configurations').select('settings').eq('id', AI_PROFILE_CONFIG_KEY).single().
   // TODO: Implement logic to fetch AI profile from a backend data store if needed.
   // For now, returns a placeholder.
   // const profileRef = doc(db, 'config', 'aiProfile');
   // const profileSnap = await getDoc(profileRef);
-  // if (profileSnap.exists()) {
   //   return NextResponse.json(profileSnap.data() as AIProfile);
   // } else {
   //   return NextResponse.json({ message: 'AI Profile not found in backend.' }, { status: 404 });
@@ -31,6 +33,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   // try {
   //   const body = await request.json() as Partial<AIProfile>;
+  // TODO: Implement logic to save AI profile to a backend data store here.
+  // Given other project files, this would likely involve saving to Supabase
+  // using supabase.from('app_configurations').upsert({ id: AI_PROFILE_CONFIG_KEY, settings: body }, { onConflict: 'id' }).
   //   // TODO: Implement logic to save AI profile to a backend data store.
   //   // const profileRef = doc(db, 'config', 'aiProfile');
   //   // await setDoc(profileRef, body, { merge: true });

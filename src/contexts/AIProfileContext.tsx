@@ -14,33 +14,30 @@ interface AIProfileContextType {
   fetchAIProfile: () => Promise<void>; 
   updateAIProfile: (newProfileData: Partial<AIProfile>) => Promise<void>; 
 }
-
-// This global variable approach for a setter is not standard React practice and can lead to issues.
-// It's better for AdminProfilePage to manage its own loading state if it needs to combine context loading with its own.
-// For now, I'll keep the mechanism but comment it out if it's causing confusion or isn't strictly necessary.
-let setIsLoadingContextAIProfileExternal: React.Dispatch<React.SetStateAction<boolean>> | null = null;
-
-
+const CACHED_AI_PROFILE_KEY = 'cached_ai_profile_kruthika_chat';
 const AIProfileContext = createContext<AIProfileContextType | undefined>(undefined);
-
 export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [aiProfile, setAIProfile] = useState<AIProfile | null>(null);
   const [isLoadingAIProfile, setIsLoadingAIProfile] = useState(true);
   const { toast } = useToast();
-  
-  useEffect(() => {
-    // This was for AdminProfilePage to control this context's loading state.
-    // It might be simpler for AdminProfilePage to have its own combined loading state.
-    // setIsLoadingContextAIProfileExternal = setIsLoadingAIProfile;
-    // return () => {
-    //   setIsLoadingContextAIProfileExternal = null;
-    // };
-  }, []);
-
-
   const fetchAIProfile = useCallback(async () => {
     setIsLoadingAIProfile(true);
     console.log("[AIProfileContext] fetchAIProfile: Starting to fetch AI profile...");
+
+    // --- Caching Logic: Check localStorage first ---
+    if (typeof window !== 'undefined') {
+      const cachedProfile = localStorage.getItem(CACHED_AI_PROFILE_KEY);
+      if (cachedProfile) {
+        try {
+          const parsedProfile = JSON.parse(cachedProfile);
+          setAIProfile(parsedProfile);
+          // Note: The current caching approach prioritizes quick load from cache but always fetches latest from Supabase in background.
+          console.log("[AIProfileContext] fetchAIProfile: Loaded AI profile from cache.");
+          // We still continue to fetch from Supabase in the background to get the latest.
+        } catch (e) { console.error("[AIProfileContext] fetchAIProfile: Error parsing cached profile:", e); }
+      }
+    }
+    // --- End Caching Logic ---
     if (!supabase) {
       console.warn("[AIProfileContext] fetchAIProfile: Supabase client not available. Using defaults for AI profile.");
       setAIProfile(defaultAIProfile);
@@ -79,6 +76,13 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         setAIProfile(mergedProfile);
         console.log("[AIProfileContext] fetchAIProfile: Set AI profile from Supabase (merged with defaults):", JSON.stringify(mergedProfile, null, 2));
+
+        // --- Caching Logic: Save to localStorage ---
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(CACHED_AI_PROFILE_KEY, JSON.stringify(mergedProfile));
+          console.log("[AIProfileContext] fetchAIProfile: Saved latest AI profile to cache.");
+        }
+        // --- End Caching Logic ---
       } else {
         console.log("[AIProfileContext] fetchAIProfile: No AI profile found in Supabase (error code PGRST116 or no data.settings). Using default values.");
         setAIProfile(defaultAIProfile);
@@ -147,7 +151,6 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
       toast({ title: "AI Profile Saved!", description: "Kruthika's profile has been saved globally to Supabase." });
       
       // Re-fetch after successful save to ensure UI reflects DB state, though optimistic update helps.
-      await fetchAIProfile();
       
     } catch (error: any) {
       console.error("[AIProfileContext] updateAIProfile: Unexpected error during Supabase save:", error);
@@ -174,17 +177,6 @@ export const useAIProfile = (): AIProfileContextType => {
     throw new Error('useAIProfile must be used within an AIProfileProvider');
   }
   return context;
-};
-
-// This function is intended for AdminProfilePage to manually set this context's loading state.
-// This might be an anti-pattern; consider if AdminProfilePage can manage a combined loading state itself.
-export const setExternalIsLoadingAIProfile = (isLoading: boolean) => {
-  // This external setter mechanism is tricky. If AIProfileContext is still loading itself,
-  // AdminProfilePage setting this to false prematurely could be problematic.
-  // This function should ideally not be needed if contexts manage their own loading states well.
-  // if (setIsLoadingContextAIProfileExternal) {
-  //   setIsLoadingContextAIProfileExternal(isLoading);
-  // }
 };
 
     

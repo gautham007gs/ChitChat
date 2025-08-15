@@ -131,7 +131,6 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, aiAvatarUrl, aiN
               data-ai-hint={imageHint}
               key={`${message.id}-content-img-${imageToShowUrl}`} 
               onError={handleContentImageError}
-              unoptimized={true} 
             />
           )}
           {message.audioUrl && (
@@ -154,4 +153,4 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, aiAvatarUrl, aiN
   );
 };
 
-export default MessageBubble;
+export default React.memo(MessageBubble);

@@ -40,8 +40,13 @@ const multilingualResponseFlow = ai.defineFlow(
     inputSchema: MultilingualResponseInputSchema,
     outputSchema: MultilingualResponseOutputSchema,
   },
-  async input => {
-    const {output} = await multilingualResponsePrompt(input);
-    return output!;
+ async input => {
+    try {
+      const { output } = await multilingualResponsePrompt(input);
+      return output!;
+    } catch (error) {
+      console.error('Error calling Genkit multilingualResponsePrompt:', error);
+      return { response: "I'm having trouble responding in that language right now. Let's try English?" };
+    }
   }
 );

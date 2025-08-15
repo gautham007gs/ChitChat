@@ -47,6 +47,10 @@ const AdminLoginPage: React.FC = () => {
     } else if (data.user) {
       // Successfully authenticated with Supabase
       try {
+        // WARNING: Storing login status only in client-side sessionStorage is NOT secure
+        // for protecting routes. It is easily bypassable.
+        // Server-side authentication checks (e.g., using Next.js middleware or on server components)
+        // are essential for truly securing admin pages.
         sessionStorage.setItem(ADMIN_AUTH_KEY, 'true');
         // Optionally, you could store the user object or a token if needed for further checks,
         // but for basic route protection, the flag is often sufficient for client-side.

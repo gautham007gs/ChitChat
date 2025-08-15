@@ -6,6 +6,15 @@ import type { AdSettings } from '@/types';
 import { useAdSettings } from '@/contexts/AdSettingsContext';
 import { cn } from '@/lib/utils';
 
+/**
+ * Component responsible for displaying Social Bar advertisements by dynamically injecting
+ * ad network script code.
+ *
+ * IMPORTANT SECURITY NOTE: This component injects raw HTML/script code obtained from
+ * the `adSettings` context. It is CRITICAL to ensure that the source of `adSettings`
+ * is secure and that ad code strings are properly validated and sanitized on the backend
+ * before being stored. Malicious code injected into adSettings could lead to XSS vulnerabilities.
+ */
 const SocialBarAdDisplay: React.FC = () => {
   const { adSettings, isLoadingAdSettings } = useAdSettings();
   const [isVisible, setIsVisible] = useState(false);
@@ -56,6 +65,10 @@ const SocialBarAdDisplay: React.FC = () => {
       try {
         const fragment = document.createRange().createContextualFragment(adCodeToInject);
         adContainerRef.current.appendChild(fragment);
+        // IMPORTANT: Consult the specific ad network's documentation (e.g., Adsterra, Monetag)
+        // for their recommended method of integrating social bar ads in modern
+        // JavaScript applications like React/Next.js. This dynamic injection
+        // might not be the most robust or recommended approach by all networks.
         scriptInjectedRef.current = true; // Mark as injected for this specific code
       } catch (e) {
         console.error("Error injecting Social Bar ad script:", e);

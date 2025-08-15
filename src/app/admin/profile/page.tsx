@@ -41,6 +41,12 @@ interface DailyCount {
   count: number;
 }
 
+/**
+ * @page AdminProfilePage
+ * @description Provides the main admin panel interface for managing AI profile, ad settings,
+ * status page content, and analytics. NOTE: The current authentication relies solely on client-side sessionStorage and is INSECURE. Server-side authentication is REQUIRED for production.
+}
+
 const AdminProfilePage: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const router = useRouter();
@@ -89,6 +95,9 @@ const AdminProfilePage: React.FC = () => {
   }, [router]);
 
   useEffect(() => {
+    // Note: Ideally, this component should primarily use the context hooks (useAIProfile,
+    // useGlobalStatus, useAIMediaAssets) for data and loading states rather than
+    // potentially redundant direct fetches like fetchAllNonAnalyticsConfigs within the component.
     if (contextAIProfile) {
       console.log("[AdminProfilePage] Context AIProfile updated, setting currentGlobalAIProfile. AvatarURL from context:", contextAIProfile.avatarUrl);
       setCurrentGlobalAIProfile(contextAIProfile);

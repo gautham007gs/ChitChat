@@ -17,6 +17,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isAiTyping }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Note: For better performance with large images, consider uploading to storage (e.g., Supabase Storage) first instead of reading as Data URL.
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -92,6 +93,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isAiTyping }) => {
       onSubmit={handleSubmit}
       className="flex items-end p-2 sm:p-3 bg-chat-input-bg border-t border-border gap-2"
     >
+      {/* Emoji button - Placeholder */}
       <Button variant="ghost" size="icon" type="button" className="text-muted-foreground hover:text-foreground/80 self-end shrink-0">
         <Smile className="h-5 w-5" />
       </Button>
@@ -109,6 +111,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, isAiTyping }) => {
           <Send className="h-5 w-5 text-primary-foreground" />
         </Button>
       ) : (
+        {/* Microphone button - Placeholder for voice input */}
         <Button variant="ghost" size="icon" type="button" className="text-muted-foreground hover:text-foreground/80 self-end shrink-0">
           <Mic className="h-5 w-5" />
         </Button>

@@ -26,6 +26,8 @@ export const GlobalStatusProvider: React.FC<{ children: ReactNode }> = ({ childr
   const { toast } = useToast();
 
   const fetchGlobalStatuses = useCallback(async () => {
+    // TODO: Consider adding client-side caching (e.g., using localStorage) for faster loading on subsequent visits.
+    // Remember to implement a cache invalidation strategy if caching is added.
     setIsLoadingGlobalStatuses(true);
     if (!supabase) {
       console.warn("Supabase client not available for fetching global statuses. Using defaults.");
@@ -66,6 +68,8 @@ export const GlobalStatusProvider: React.FC<{ children: ReactNode }> = ({ childr
         setManagedDemoContacts(defaultManagedContactStatuses);
       } else if (demoContactsData && Array.isArray(demoContactsData.settings)) {
          // Ensure defaultManagedContactStatuses provides a fallback for each ID if needed, or merge carefully
+        // TODO: Add more thorough data structure validation here and for adminStatusData against
+        // the expected types (ManagedContactStatus[], AdminStatusDisplay) to ensure data integrity.
         const fetchedContacts = demoContactsData.settings as ManagedContactStatus[];
         // A simple merge: override defaults with fetched if IDs match, then add any new fetched.
         // For a more robust merge, you might iterate and update based on ID.

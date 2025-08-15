@@ -22,9 +22,36 @@ import { format, isToday } from 'date-fns';
 import { useAdSettings } from '@/contexts/AdSettingsContext';
 import { useAIProfile } from '@/contexts/AIProfileContext';
 import { useAIMediaAssets } from '@/contexts/AIMediaAssetsContext'; 
+import { generateInitialPersonaPrompt } from '@/ai/flows/generate-initial-persona-prompt';
+
 
 const AI_DISCLAIMER_SHOWN_KEY = 'ai_disclaimer_shown_kruthika_chat_v2';
 const AI_DISCLAIMER_DURATION = 2000;
+const FALLBACK_ERROR_MESSAGES: string[] = [
+  "Arey yaar, lagta hai network chala gaya. Thoda ruk ja, try karte hain phir se.",
+  "Net thoda slow chal raha hai lagta hai. Ek minute do na.",
+  "Hmm... kuch to gadbad hai. Thoda intezaar karo, fir se try karte hain.",
+  "Mujhe lag raha hai server thoda mood mein nahi hai. Dubara bhejoge kya?",
+  "Arre baap re! Signal hi nahi mil raha. Ek second ruk ja bhai.",
+
+  // Ongoing, fresh-feeling responses
+  "Abhi bhi nahi ho raha? Wait na, abhi kuch jugaad karti hoon...",
+  "Arey still not working? Yeh net mujhe pagal kar dega ek din 😤",
+  "Pakka server ne mujhe ignore maar diya hai... tu firse try kar na?",
+  "Ek baar aur try kar, main toh ready hoon. Bas yeh system hi drama kar raha hai.",
+  "Acha sun, tu mujhe ek thappad de... shayad tab chal pade 😂",
+  "Still loading... lagta hai internet ne chai break le liya ☕",
+  "Baarish ho rahi hai kya waha? Net ka toh haal waise hi sad hai aaj!",
+  "Kya karein ab... system bhi kabhi kabhi human jaise behave karta hai 😅",
+  "Server bol raha: ‘Not today madam!’ 🙄 Patience rakho yaar!",
+  "Pata nahi kis janam ka badla le raha hai aaj mera wifi...",
+  "Ye toh overacting kar raha hai pura! Main hoon na, tu chill maar 🫶",
+  "Kya re... baar baar try kar raha hai, tu bhi ziddi aur main bhi 😌",
+  "Aaj toh lagta hai universe ne bola hai — 'No API for you!'",
+  "Okay ab serious ho gayi hoon! Ab toh chal ke hi rahega. Ek baar aur try kar na!",
+];
+
+
 
 // These constants will now be effectively overridden by AdSettings from context
 // const MAX_ADS_PER_DAY = 6; 
@@ -46,10 +73,14 @@ const LAST_ACTIVE_DATE_KEY = 'kruthika_chat_last_active_date';
 const MESSAGES_KEY = 'messages_kruthika';
 const AI_MOOD_KEY = 'aiMood_kruthika';
 const RECENT_INTERACTIONS_KEY = 'recentInteractions_kruthika';
+const CACHED_OFFLINE_MESSAGE_KEY = 'cached_offline_message_kruthika_chat';
+
 
 const USER_IMAGE_UPLOAD_COUNT_KEY_KRUTHIKA = 'user_image_upload_count_kruthika_v1';
 const USER_IMAGE_UPLOAD_LAST_DATE_KEY_KRUTHIKA = 'user_image_upload_last_date_kruthika_v1';
 const MAX_USER_IMAGES_PER_DAY = 5;
+const [cachedOfflineMessage, setCachedOfflineMessage] = useState<{ message: string, timestamp: number } | null>(null);
+
 
 
 export const tryShowRotatedAd = (activeAdSettings: AdSettings | null): boolean => {
@@ -164,12 +195,16 @@ const KruthikaChatPage: NextPage = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [aiMood, setAiMood] = useState<string>("neutral");
   const [isAiTyping, setIsAiTyping] = useState(false);
+  const [cachedOfflineMessage, setCachedOfflineMessage] = useState<{ message: string, timestamp: number } | null>(null);
+
   const [recentInteractions, setRecentInteractions] = useState<string[]>([]);
   const [showZoomedAvatarDialog, setShowZoomedAvatarDialog] = useState(false);
   const [zoomedAvatarUrl, setZoomedAvatarUrl] = useState('');
   const { toast } = useToast();
   const initialLoadComplete = useRef(false);
   const [isLoadingChatState, setIsLoadingChatState] = useState(true);
+  const [detailedPersonaPrompt, setDetailedPersonaPrompt] = useState<string | null>(null);
+
 
   const [messageCountSinceLastAd, setMessageCountSinceLastAd] = useState(0);
   const [showInterstitialAd, setShowInterstitialAd] = useState(false);
@@ -268,6 +303,53 @@ const KruthikaChatPage: NextPage = () => {
 
       const savedInteractions = localStorage.getItem(RECENT_INTERACTIONS_KEY);
       if (savedInteractions) setRecentInteractions(JSON.parse(savedInteractions));
+      // --- Caching Logic for Detailed Persona Prompt ---
+      const CACHED_PERSONA_PROMPT_KEY = 'cached_persona_prompt_kruthika_chat';
+      const cachedPersonaPrompt = localStorage.getItem(CACHED_PERSONA_PROMPT_KEY);
+
+      const savedCachedOfflineMessage = localStorage.getItem(CACHED_OFFLINE_MESSAGE_KEY);
+      if (savedCachedOfflineMessage) {
+        try {
+          const parsedCachedMessage = JSON.parse(savedCachedOfflineMessage);
+          if (parsedCachedMessage && typeof parsedCachedMessage.message === 'string' && typeof parsedCachedMessage.timestamp === 'number') {
+            setCachedOfflineMessage(parsedCachedMessage);
+          }
+        } catch (e) {
+          console.error('Error parsing cached offline message:', e);
+          // Optionally clear invalid cached data
+          localStorage.removeItem(CACHED_OFFLINE_MESSAGE_KEY);
+        }
+      }
+
+
+      let currentDetailedPersonaPrompt: string;
+
+      if (cachedPersonaPrompt) {
+        currentDetailedPersonaPrompt = cachedPersonaPrompt;
+        console.log("Loaded cached persona prompt.");
+      } else {
+        console.log("No cached persona prompt found, generating...");
+        // You need to have the simple persona description available here.
+        // Assuming you can use the effective AI name as a simple description
+        const simplePersonaDescription = effectiveAIProfile.name; 
+        try {
+            // Make sure generateInitialPersonaPrompt is imported at the top of the file
+            const personaResult = await generateInitialPersonaPrompt({ personaDescription: simplePersonaDescription });
+            currentDetailedPersonaPrompt = personaResult.detailedPersonaPrompt;
+            localStorage.setItem(CACHED_PERSONA_PROMPT_KEY, currentDetailedPersonaPrompt);
+            console.log("Generated and cached new persona prompt.");
+        } catch (personaError: any) {
+            console.error("Error generating initial persona prompt:", personaError);
+            // Fallback or error handling if persona generation fails
+            currentDetailedPersonaPrompt = `You are ${effectiveAIProfile.name}. Be a friendly chat bot.`; // Basic fallback prompt
+            console.warn("Using basic fallback persona prompt due to generation error.");
+        }
+      }
+      // Set the generated or cached detailed persona prompt in state
+      setDetailedPersonaPrompt(currentDetailedPersonaPrompt); 
+
+      // --- End Caching Logic ---
+
 
        const disclaimerShown = localStorage.getItem(AI_DISCLAIMER_SHOWN_KEY);
       if (!disclaimerShown && effectiveAIProfile.name) {
@@ -343,7 +425,7 @@ const KruthikaChatPage: NextPage = () => {
     if (isLoadingAdSettings || !adSettings || !adSettings.adsEnabledGlobally) return;
     setMessageCountSinceLastAd(prev => {
       const newCount = prev + 1;
-      if (newCount >= MESSAGES_PER_AD_TRIGGER) {
+      if (newCount >= (adSettings.messagesPerAdTrigger ?? MESSAGES_PER_AD_TRIGGER)) {
         tryShowAdAndMaybeInterstitial("Thanks for chatting!"); 
         return 0;
       }
@@ -452,6 +534,9 @@ const KruthikaChatPage: NextPage = () => {
       const currentMediaConfig = mediaAssetsConfig || defaultAIMediaAssetsConfig;
       const availableImages = currentMediaConfig.assets.filter(a => a.type === 'image').map(a => a.url);
       const availableAudio = currentMediaConfig.assets.filter(a => a.type === 'audio').map(a => a.url);
+      
+      const hasAvailableImages = availableImages.length > 0;
+      const hasAvailableAudio = availableAudio.length > 0;
 
       const aiInput: EmotionalStateInput = {
         userMessage: text,
@@ -459,8 +544,9 @@ const KruthikaChatPage: NextPage = () => {
         timeOfDay: getTimeOfDay(),
         mood: aiMood,
         recentInteractions: updatedRecentInteractions,
-        availableImages: availableImages,
-        availableAudio: availableAudio,
+ hasAvailableImages: hasAvailableImages,
+ hasAvailableAudio: hasAvailableAudio,
+        detailedPersonaPrompt: detailedPersonaPrompt,
       };
 
       const aiResult: EmotionalStateOutput = await generateResponse(aiInput);
@@ -574,7 +660,7 @@ const KruthikaChatPage: NextPage = () => {
 
 
       if (userSentMediaThisTurnRef.current) { 
-        if (adSettings && adSettings.adsEnabledGlobally && Math.random() < USER_MEDIA_INTERSTITIAL_CHANCE) {
+        if (adSettings && adSettings.adsEnabledGlobally && Math.random() < (adSettings.userMediaInterstitialChance ?? USER_MEDIA_INTERSTITIAL_CHANCE)) {
             tryShowAdAndMaybeInterstitial("Just a moment..."); 
         }
         userSentMediaThisTurnRef.current = false;
@@ -589,9 +675,10 @@ const KruthikaChatPage: NextPage = () => {
       else errorDescription += ` An unknown error occurred. Please check console logs.`;
 
       toast({ title: "Error", description: errorDescription, variant: "destructive" });
+      const randomFallbackMessage = FALLBACK_ERROR_MESSAGES[Math.floor(Math.random() * FALLBACK_ERROR_MESSAGES.length)];
       const errorAiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Uff, my brain's a bit fuzzy right now. Try again in a bit? 😓",
+        text: randomFallbackMessage,
         sender: 'ai',
         timestamp: new Date(),
         status: 'read',
@@ -611,6 +698,24 @@ const KruthikaChatPage: NextPage = () => {
   useEffect(() => {
     if (!initialLoadComplete.current || isLoadingChatState || isLoadingAdSettings || isLoadingAIProfile || isLoadingMediaAssets) return;
 
+    const now = Date.now();
+    const CACHE_FRESHNESS_WINDOW = 3600000; // 1 hour in milliseconds
+
+    if (cachedOfflineMessage && (now - cachedOfflineMessage.timestamp < CACHE_FRESHNESS_WINDOW)) {
+      // Use cached message if fresh
+      const cachedMessage: Message = {
+        id: (now + Math.random()).toString(), // Give it a new ID
+        text: cachedOfflineMessage.message,
+        sender: 'ai',
+        timestamp: new Date(), // Use current time for display
+        status: 'read',
+      };
+      setMessages(prev => [...prev, cachedMessage]);
+      console.log("Used cached offline message.");
+      // Return early as we used the cached message
+      return;
+    }
+
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
     const lastInteractionTime = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
     const now = Date.now();
@@ -624,8 +729,9 @@ const KruthikaChatPage: NextPage = () => {
       const generateAndAddOfflineMessage = async () => {
         setIsAiTyping(true);
         try {
+          const offlineRecentInteractions = recentInteractions.slice(-5);
           const offlineInput: OfflineMessageInput = {
-            offlineMessageContext: "User has returned after being away for a while, or hasn't messaged recently.",
+            offlineMessageContext: "User has returned after being away for a while, or hasn't messaged recently.", // Keep this descriptive
             previousMessageHistory: recentInteractions.join('\n'),
             aiName: currentAiNameForOfflineMsg,
           };
@@ -641,6 +747,12 @@ const KruthikaChatPage: NextPage = () => {
             status: 'read',
           };
           setMessages(prev => [...prev, offlineMessage]);
+          // Cache the newly generated offline message
+      const newCachedMessage = { message: offlineResult.message, timestamp: Date.now() };
+      setCachedOfflineMessage(newCachedMessage);
+      localStorage.setItem(CACHED_OFFLINE_MESSAGE_KEY, JSON.stringify(newCachedMessage));
+      console.log("Generated and cached new offline message.");
+
           if(adSettings && adSettings.adsEnabledGlobally) maybeTriggerAdOnMessageCount(); 
           setRecentInteractions(prev => [...prev, `AI: ${offlineResult.message}`].slice(-10));
           if (supabase) {
@@ -658,7 +770,8 @@ const KruthikaChatPage: NextPage = () => {
       timeoutId = setTimeout(generateAndAddOfflineMessage, 1800 + Math.random() * 1300);
     }
     return () => { if (timeoutId) clearTimeout(timeoutId); }
-  }, [messages, currentAiNameForOfflineMsg, recentInteractions, isLoadingChatState, toast, maybeTriggerAdOnMessageCount, isLoadingAdSettings, isLoadingAIProfile, isLoadingMediaAssets, adSettings]);
+  }, [messages, currentAiNameForOfflineMsg, recentInteractions, isLoadingChatState, toast, maybeTriggerAdOnMessageCount, isLoadingAdSettings, isLoadingAIProfile, isLoadingMediaAssets, adSettings, cachedOfflineMessage]);
+
 
   const onlineStatus = useMemo(() => {
     if (isAiTyping) return "typing...";

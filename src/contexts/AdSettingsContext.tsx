@@ -13,6 +13,8 @@ interface AdSettingsContextType {
   fetchAdSettings: () => Promise<void>; // Allow manual refetch if needed
 }
 
+const CACHED_AD_SETTINGS_KEY = 'cached_ad_settings_kruthika_chat';
+
 const AdSettingsContext = createContext<AdSettingsContextType | undefined>(undefined);
 
 export const AdSettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -27,6 +29,21 @@ export const AdSettingsProvider: React.FC<{ children: ReactNode }> = ({ children
       setIsLoadingAdSettings(false);
       return;
     }
+    
+    // --- Caching Logic ---
+    // Check for cached settings first
+    if (typeof window !== 'undefined') {
+      const cachedSettings = localStorage.getItem(CACHED_AD_SETTINGS_KEY);
+      if (cachedSettings) {
+        try {
+          setAdSettings(JSON.parse(cachedSettings) as AdSettings);
+        } catch (e) { console.error("Failed to parse cached ad settings", e); } // Handle potential parsing errors
+      }
+      // Note: The cache is read on mount for faster initial load.
+      // The latest settings are always fetched from Supabase afterward.
+      // Consider implementing a cache invalidation strategy (e.g., using versions or real-time updates)
+      // if immediate updates across active sessions are required.
+    }
 
     try {
       const { data, error } = await supabase
@@ -40,7 +57,9 @@ export const AdSettingsProvider: React.FC<{ children: ReactNode }> = ({ children
         setAdSettings(defaultAdSettings); // Fallback to defaults on error
       } else if (data && data.settings) {
         // Merge fetched settings with defaults to ensure all keys are present
-        const mergedSettings = { ...defaultAdSettings, ...(data.settings as AdSettings) };
+        // Ensure fetched settings override defaults where keys match.
+        const mergedSettings = { ...defaultAdSettings, ...(data.settings as Partial<AdSettings>) }; // Cast as Partial<AdSettings> for safety
+        localStorage.setItem(CACHED_AD_SETTINGS_KEY, JSON.stringify(mergedSettings)); // Cache the fetched settings
         setAdSettings(mergedSettings);
       } else {
         // No settings found in Supabase, use defaults (admin might save them later)

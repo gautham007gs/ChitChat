@@ -20,8 +20,8 @@ const TermsOfServicePage = () => {
               <h3 className="font-semibold">Important: Placeholder Content</h3>
               <p className="text-sm">
                 The content on this page is a template and NOT legally binding. You MUST replace this with your own
-                Terms of Service, drafted or reviewed by a legal professional, to suit your specific application,
-                data handling practices, and jurisdiction.
+ Terms of Service, drafted or reviewed by a legal professional, to suit your specific application,
+ data handling practices, and jurisdiction.
               </p>
             </div>
 

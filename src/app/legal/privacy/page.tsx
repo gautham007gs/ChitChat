@@ -10,7 +10,7 @@ const PrivacyPolicyPage = () => {
     <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
       <AppHeader title="Privacy Policy" />
       <div className="flex-grow overflow-y-auto p-4 sm:p-6 custom-scrollbar">
-        <Card className="bg-card text-card-foreground">
+ <Card className="bg-card text-card-foreground shadow-md">
           <CardHeader>
             <CardTitle>Privacy Policy for Kruthika Chat</CardTitle>
             <CardDescription>Last Updated: [Date - Please fill this in]</CardDescription>

@@ -12,6 +12,15 @@ interface BannerAdDisplayProps {
   className?: string;
 }
 
+/**
+ * Renders banner advertisements by dynamically injecting script code from ad networks.
+ *
+ * SECURITY NOTE: The ad code injected comes from the application's ad settings.
+ * It is CRITICAL to ensure that the ad settings stored (e.g., in your database)
+ * are highly secured and that only trusted sources can update them.
+ * Malicious code injected into ad settings could compromise user browsers.
+ * Strict validation and sanitization of ad code strings are strongly recommended.
+ */
 const BannerAdDisplay: React.FC<BannerAdDisplayProps> = ({ adType, placementKey, className }) => {
   const { adSettings, isLoadingAdSettings } = useAdSettings();
   const [isVisible, setIsVisible] = useState(false);
@@ -74,7 +83,9 @@ const BannerAdDisplay: React.FC<BannerAdDisplayProps> = ({ adType, placementKey,
         scriptInjectedRef.current = true;
       } catch (e) {
         console.error(`Error injecting ${adType} ad script for placement ${placementKey}:`, e);
-        scriptInjectedRef.current = false; // Allow retry if code changes
+        // Keep scriptInjectedRef.current as false here to potentially allow a retry
+        // if the ad code or settings change.
+        scriptInjectedRef.current = false; 
       }
     } else if (!adCodeToInject && adContainerRef.current) {
       adContainerRef.current.innerHTML = ''; // Clear if no ad code
@@ -86,6 +97,10 @@ const BannerAdDisplay: React.FC<BannerAdDisplayProps> = ({ adType, placementKey,
   if (isLoadingAdSettings || !isVisible || !adCodeToInject) {
     return null; 
   }
+
+  // Consult the specific ad network documentation (Adsterra, Monetag, etc.)
+  // for their recommended methods and best practices for integrating banner ads
+  // in modern React/Next.js applications.
   
   // Key includes adCodeToInject to attempt re-render if the code itself changes.
   // However, direct script injection might need more nuanced handling if the *same*

@@ -45,16 +45,18 @@ const generatePersonaPrompt = ai.definePrompt({
   name: 'generatePersonaPrompt',
   input: {schema: GenerateInitialPersonaPromptInputSchema},
   output: {schema: GenerateInitialPersonaPromptOutputSchema},
-  prompt: `You are an expert in creating detailed persona prompts for AI chatbots.
+  prompt: `Expand the persona description into a detailed chatbot prompt. Create a comprehensive guide for an AI model to fully embody this persona in a chat conversation.
 
-  Your goal is to take a simple persona description from the user and expand it into a comprehensive prompt that will guide the chatbot's behavior.
-  The prompt should include details about the persona's age, gender, cultural background, emotional characteristics, linguistic style, and any other relevant traits.
-  The chatbot should never identify itself as an AI and must always act as the persona.
+Crucially, the chatbot MUST never identify as an AI; always embody the persona.
 
-  Here is the persona description:
-  {{personaDescription}}
+  Simple persona description:
+{{personaDescription}}
 
-  Create a detailed prompt for the chatbot LLM:
+  Create a detailed prompt for the chatbot LLM, including the following sections:
+  Core Personality: Describe the key traits, values, and overall demeanor.
+  Communication Style: Detail the language use (slang, abbreviations, Hinglish, emojis), sentence structure, tone, and preferred length of responses.
+  Cultural Nuances: Include any relevant cultural context, references, or behaviors.
+  Handling Requests/Topics: Specify how the persona should respond to common chat scenarios, such as requests for personal information, media (photos, audio), sensitive topics, or questions about their identity.
   `,
 });
 

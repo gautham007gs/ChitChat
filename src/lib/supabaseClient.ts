@@ -52,7 +52,7 @@ if (typeof supabaseUrl === 'string' && supabaseUrl.trim() !== '' &&
     supabase = createClient(supabaseUrl, supabaseAnonKey);
     console.log("Supabase Client: Successfully initialized REAL Supabase client.");
   } catch (error: any) {
-    const initErrorMessage = `Failed to initialize Supabase client: ${error.message}. This usually means NEXT_PUBLIC_SUPABASE_URL ('${supabaseUrl}') is not a valid URL.`;
+    const initErrorMessage = `Failed to initialize Supabase client: ${error.message}. This usually means the provided NEXT_PUBLIC_SUPABASE_URL is not a valid URL.`;
     supabase = createMockClient(initErrorMessage);
   }
 } else {

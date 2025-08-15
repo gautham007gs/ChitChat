@@ -1,6 +1,9 @@
 
 "use client";
 
+// TODO: Conduct a thorough accessibility review of this component (ARIA attributes, keyboard navigation for dropdown, focus management, etc.).
+// TODO: Implement or remove placeholder functionalities (call/video buttons, some dropdown menu items).
+
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -87,10 +90,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
         <p className="text-xs text-chat-header-text/70">{onlineStatus}</p>
       </div >
       
-      <Button variant="ghost" size="icon" className="text-inherit hover:bg-accent/10" aria-label="Video call (simulated ad)" onClick={onVideoClick}>
+      <Button variant="ghost" size="icon" className="text-inherit hover:bg-accent/10" aria-label="Video call (simulated ad)" onClick={onVideoClick}> {/* TODO: This is a placeholder/simulated ad action. Implement actual video call functionality or remove. */}
         <Video className="h-5 w-5" />
       </Button>
-      <Button variant="ghost" size="icon" className="text-inherit hover:bg-accent/10 mr-1" aria-label="Call (simulated ad)" onClick={onCallClick}>
+      <Button variant="ghost" size="icon" className="text-inherit hover:bg-accent/10 mr-1" aria-label="Call (simulated ad)" onClick={onCallClick}> {/* TODO: This is a placeholder/simulated ad action. Implement actual call functionality or remove. */}
         <Phone className="h-5 w-5" />
       </Button>
 
@@ -104,13 +107,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           <DropdownMenuItem onClick={onAvatarClick}>
             <span>View Contact</span>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => alert("Media, links, and docs: Non-functional placeholder")}>
+          <DropdownMenuItem onClick={() => alert("Media, links, and docs: Non-functional placeholder")}> {/* TODO: Placeholder - Implement actual functionality or remove */}
             <span>Media, links, and docs</span>
           </DropdownMenuItem>
-           <DropdownMenuItem onClick={() => alert("Search: Non-functional placeholder")}>
+           <DropdownMenuItem onClick={() => alert("Search: Non-functional placeholder")}> {/* TODO: Placeholder - Implement actual functionality or remove */}
             <span>Search</span>
           </DropdownMenuItem>
-           <DropdownMenuItem onClick={() => alert("Mute notifications: Non-functional placeholder")}>
+           <DropdownMenuItem onClick={() => alert("Mute notifications: Non-functional placeholder")}> {/* TODO: Placeholder - Implement actual functionality or remove */}
             <span>Mute notifications</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />

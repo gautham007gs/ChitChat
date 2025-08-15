@@ -9,12 +9,23 @@ const GlobalAdScripts: React.FC = () => {
   const { adSettings, isLoadingAdSettings } = useAdSettings(); // Consume context
   const adsterraPopunderInjected = useRef(false);
   const monetagPopunderInjected = useRef(false);
+  const adsterraSocialBarInjected = useRef(false);
 
   useEffect(() => {
     if (isLoadingAdSettings || !adSettings || typeof document === 'undefined') {
       return;
     }
 
+    /**
+     * Injects a script into the document body.
+     * WARNING: Using innerHTML to parse script code from an untrusted source can be a security risk (XSS).
+     * Ensure that the source of `scriptCode` (i.e., your ad settings) is strictly controlled and sanitized.
+     *
+     * Consider alternative, safer methods for injecting external scripts provided by ad networks.
+     * Consult the specific ad network documentation for recommended integration methods in modern web applications.
+     *
+     * @param scriptCode The script code to inject.
+     */
     const injectScript = (scriptCode: string, networkName: string, injectedRef: React.MutableRefObject<boolean>) => {
       if (injectedRef.current || !scriptCode || !scriptCode.trim() || scriptCode.toLowerCase().includes('placeholder')) {
         return; 
@@ -73,6 +84,11 @@ const GlobalAdScripts: React.FC = () => {
       if (adSettings.monetagPopunderEnabled && !monetagPopunderInjected.current) {
         injectScript(adSettings.monetagPopunderCode, "Monetag", monetagPopunderInjected);
       }
+    }
+
+    // Adsterra Social Bar
+    if (adSettings.adsterraSocialBarEnabled && !adsterraSocialBarInjected.current) {
+      injectScript(adSettings.adsterraSocialBarCode, "Adsterra Social Bar", adsterraSocialBarInjected);
     }
     // Clean up: Potentially remove scripts if settings change to disabled during session?
     // For simplicity, current approach injects if enabled on load and doesn't remove.

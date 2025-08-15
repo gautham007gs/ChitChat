@@ -46,6 +46,15 @@ const getApiKey = (): string | undefined => {
   // !!! **CRITICAL**: DO NOT COMMIT THIS HARDCODED KEY TO GIT OR DEPLOY IT! !!!
   // !!! REMOVE IT OR COMMENT IT OUT BEFORE PUSHING TO GITHUB/VERCEL!        !!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //
+  // === SECURITY WARNING: HARDCODED API KEY ===
+  // The line below contains a hardcoded API key intended *only* for temporary
+  // testing in environments like Firebase Studio where process.env might not
+  // be readily available.
+  //
+  // >>> IT IS CRITICAL TO REMOVE OR COMMENT OUT THIS LINE BEFORE COMMITTING <<<
+  // >>> TO GIT OR DEPLOYING TO ANY ENVIRONMENT (STAGING, PRODUCTION, ETC.) <<<
+  // >>> STRONGLY RECOMMEND USING A GIT PRE-COMMIT HOOK to prevent this.   <<<
   const studioDevApiKey = "YOUR_GEMINI_API_KEY_HERE_FOR_STUDIO_TESTING"; // <<<<<<< REPLACE THIS WITH YOUR ACTUAL KEY FOR STUDIO
   if (studioDevApiKey && studioDevApiKey !== "YOUR_GEMINI_API_KEY_HERE_FOR_STUDIO_TESTING" && studioDevApiKey.length >= MIN_API_KEY_LENGTH) {
       console.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -64,6 +73,12 @@ const getApiKey = (): string | undefined => {
   );
   return undefined;
 };
+
+// For production environments, consider integrating a logging/monitoring service
+// (e.g., Sentry, LogRocket, Cloud Logging) to capture and alert on the console.error
+// messages from `getApiKey` when no valid key is found. This provides better visibility
+// into critical configuration issues in deployed applications compared to relying
+// solely on console logs.
 
 const activeApiKey = getApiKey();
 

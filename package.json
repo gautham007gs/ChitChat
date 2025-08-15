@@ -13,6 +13,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    // Note: Project includes dependencies for both Supabase (@supabase/supabase-js)
+    // and Firebase (@tanstack-query-firebase/react, src/lib/firebase.ts).
+    // Resolve backend inconsistency: decide on one and remove unused dependencies/files.
+    // Note: @tanstack/react-query and @tanstack-query-firebase/react are present. Ensure consistent usage or remove if not needed.
     "@genkit-ai/googleai": "^1.8.0",
     "@genkit-ai/next": "^1.8.0",
     "@hookform/resolvers": "^4.1.3",

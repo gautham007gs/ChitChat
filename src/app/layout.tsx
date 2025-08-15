@@ -18,6 +18,14 @@ export const metadata: Metadata = {
   title: 'Kruthika Chat - Your AI Companion',
   description: 'Chat with Kruthika, your friendly and engaging AI companion. Experience a unique AI chat with Kruthika, sometimes referred to as an AI girlfriend experience for companionship.',
   keywords: 'Kruthika, Kruthika Chat, AI Chat, AI girlfriend, virtual companion, chat bot, AI companion, conversational AI',
+  openGraph: {
+    title: 'Kruthika Chat - Your AI Companion',
+    description: 'Chat with Kruthika, your friendly and engaging AI companion. Experience a unique AI chat with Kruthika, sometimes referred to as an AI girlfriend experience for companionship.',
+    siteName: 'Kruthika Chat',
+    type: 'website',
+    // Add a placeholder image URL. Replace with your actual image URL.
+    // images: ['https://yourwebsite.com/og-image.jpg'],
+  },
 };
 
 export default function RootLayout({
@@ -33,10 +41,14 @@ export default function RootLayout({
             <AIProfileProvider>
               <GlobalStatusProvider>
                 <AIMediaAssetsProvider>
+                  {/* Component to prompt users opening the site via Instagram's in-app browser */}
                   <InstagramBrowserPrompt />
+                  {/* Component for global ad scripts (e.g., Google AdSense) */}
                   <GlobalAdScripts />
                   {children}
-                  <SocialBarAdDisplay /> {/* Add SocialBarAdDisplay here */}
+                  {/* Component to display social bar ads, present on all pages */}
+                  <SocialBarAdDisplay />
+                  {/* Component for displaying toasts (notifications) globally */}
                   <Toaster />
                 </AIMediaAssetsProvider>
               </GlobalStatusProvider>

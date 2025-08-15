@@ -14,6 +14,7 @@ interface AIMediaAssetsContextType {
   fetchMediaAssets: () => Promise<void>;
 }
 
+const CACHED_MEDIA_ASSETS_CONFIG_KEY = 'cached_media_assets_config_kruthika_chat';
 const AIMediaAssetsContext = createContext<AIMediaAssetsContextType | undefined>(undefined);
 
 export const AIMediaAssetsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -23,6 +24,22 @@ export const AIMediaAssetsProvider: React.FC<{ children: ReactNode }> = ({ child
 
   const fetchMediaAssets = useCallback(async () => {
     setIsLoadingMediaAssets(true);
+
+    // Check localStorage for cached settings first
+    // Current caching behavior: Loads cached data instantly if available,
+    // then fetches from Supabase in the background to get the latest.
+    // Consider implementing cache invalidation strategies (e.g., using Supabase real-time)
+    // for more dynamic updates across active clients if settings change frequently.
+    const cachedSettings = localStorage.getItem(CACHED_MEDIA_ASSETS_CONFIG_KEY);
+    if (cachedSettings) {
+      try {
+        setMediaAssetsConfig(JSON.parse(cachedSettings));
+      } catch (e) {
+        console.error("Failed to parse cached media assets settings:", e);
+        localStorage.removeItem(CACHED_MEDIA_ASSETS_CONFIG_KEY); // Clear invalid cache
+      }
+    }
+
     if (!supabase) {
       console.warn("Supabase client not available for fetching AI media assets. Using defaults.");
       setMediaAssetsConfig(defaultAIMediaAssetsConfig);
@@ -43,6 +60,7 @@ export const AIMediaAssetsProvider: React.FC<{ children: ReactNode }> = ({ child
         setMediaAssetsConfig(defaultAIMediaAssetsConfig);
       } else if (data && data.settings && Array.isArray((data.settings as AIMediaAssetsConfig).assets)) {
         setMediaAssetsConfig(data.settings as AIMediaAssetsConfig);
+        localStorage.setItem(CACHED_MEDIA_ASSETS_CONFIG_KEY, JSON.stringify(data.settings)); // Cache the fetched settings
       } else {
         setMediaAssetsConfig(defaultAIMediaAssetsConfig);
       }

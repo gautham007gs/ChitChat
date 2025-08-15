@@ -78,7 +78,13 @@ const generateOfflineMessageFlow = ai.defineFlow(
     outputSchema: OfflineMessageOutputSchema,
   },
   async input => {
-    const {output} = await offlineMessagePrompt(input);
+    try {
+      const {output} = await offlineMessagePrompt(input);
+      return output!;
+    } catch (error) {
+      console.error('Error generating offline message:', error);
+      return { message: "Hey! Missed you! 😉" }; // Fallback message
+    }
     return output!;
   }
 );

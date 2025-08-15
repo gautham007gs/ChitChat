@@ -9,6 +9,7 @@ body {
 
 @layer base {
   :root {
+    /* Remember to check color contrast ratios for accessibility */
     /* WhatsApp Inspired Green Theme */
     --background: 48 33% 94%; /* Light Beige/Cream for page background (e.g., #F5F1E8) */
     --foreground: 0 0% 15%; /* Dark Gray for text - good contrast */
@@ -73,6 +74,7 @@ body {
   }
 
   .dark {
+    /* Remember to check color contrast ratios for accessibility */
     /* Dark Theme (adjust if needed, keeping general structure but with darker greens/greys) */
     --background: 220 13% 10%; /* Dark grey/blue background */
     --foreground: 120 10% 85%; /* Light grey/greenish text */

@@ -1,5 +1,9 @@
 
 // src/app/api/test-db/route.ts
+// NOTE: This endpoint is configured for testing Firestore connectivity.
+// If the project's primary database is Supabase (as suggested by other files),
+// this file is likely unnecessary and should be removed, or converted to test Supabase instead.
+
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase'; // Our initialized Firestore instance
 import { collection, getDocs, limit } from 'firebase/firestore';
@@ -46,7 +50,7 @@ export async function GET() {
         error: error.message,
         details: "Ensure your Firebase project is set up, Firestore is enabled, environment variables (NEXT_PUBLIC_FIREBASE_...) are correct in .env.local, and Firestore security rules allow access."
       }, 
-      { status: 500 }
-    ); // Added missing closing parenthesis here
+      { status: 500 } // Fixed missing closing parenthesis
+    );
   }
 }

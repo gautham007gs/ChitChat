@@ -74,6 +74,24 @@ export interface AdSettings {
   // New fields for controlling ad frequency
   maxDirectLinkAdsPerDay: number;
   maxDirectLinkAdsPerSession: number;
+  messagesPerAdTrigger?: number;
+  inactivityAdTimeoutMs?: number; // Added for configurable inactivity timeout
+  inactivityAdChance?: number; // Added for configurable inactivity chance
+  userMediaInterstitialChance?: number; // Added for configurable user media interstitial chance
+
+}
+
+// Input schema for the Emotional State Simulation flow
+export interface EmotionalStateInput {
+  userMessage: string;
+  userImageUri?: string;
+  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night';
+  mood?: string;
+  recentInteractions: string[];
+  hasAvailableImages?: boolean; // Changed from availableImages?: string[];
+  hasAvailableAudio?: boolean; // Changed from availableAudio?: string[];
+  detailedPersonaPrompt?: string; // Added for caching
+
 }
 
 export interface AIMediaAsset {

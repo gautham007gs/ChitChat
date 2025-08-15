@@ -4,6 +4,8 @@ import type { Message } from '@/types';
 import MessageBubble from './MessageBubble';
 import TypingIndicator from './TypingIndicator';
 
+// Consider implementing list virtualization (e.g., with react-window) for better performance with very large message lists.
+
 interface ChatViewProps {
   messages: Message[];
   aiAvatarUrl: string;
@@ -19,7 +21,7 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, aiAvatarUrl, aiName, isAi
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  useEffect(scrollToBottom, [messages, isAiTyping]);
+  useEffect(scrollToBottom, [messages.length]); // Scroll to bottom when a new message is added
 
   return (
     <div 

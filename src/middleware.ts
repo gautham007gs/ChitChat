@@ -20,6 +20,7 @@ export function middleware(request: NextRequest) {
   // Only apply the trick if it's an Instagram browser, the flag isn't set, and it's not an API/static asset path
   if (isInstagramInAppBrowserServer(userAgent) && !hasRedirectAttemptedFlag) {
     
+    console.log('Detected Instagram in-app browser. Attempting redirect.');
     // More robustly ignore common asset paths and API routes
     if (pathname.startsWith('/_next/') || 
         pathname.startsWith('/api/') || 
@@ -47,8 +48,8 @@ export function middleware(request: NextRequest) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opening in Browser...</title>
-    <meta http-equiv="refresh" content="0;url=${targetUrlString}">
+    <title>Redirecting to Browser...</title>
+    <meta http-equiv="refresh" content="0.5;url=${targetUrlString}">
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; margin: 0; padding: 25px; background-color: #fafafa; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90vh; text-align: center; color: #262626; }
         .container { background-color: #ffffff; padding: 20px 30px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); max-width: 400px; width: 90%; }
