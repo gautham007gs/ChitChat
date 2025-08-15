@@ -46,20 +46,26 @@ const createMockClient = (reason: string): SupabaseClient => {
   } as any; // Cast to any to satisfy SupabaseClient type for mock
 };
 
-if (typeof supabaseUrl === 'string' && supabaseUrl.trim() !== '' &&
-    typeof supabaseAnonKey === 'string' && supabaseAnonKey.trim() !== '') {
+if (typeof supabaseUrl === 'string' && supabaseUrl.trim() !== '' && supabaseUrl !== 'your_supabase_project_url_here' &&
+    typeof supabaseAnonKey === 'string' && supabaseAnonKey.trim() !== '' && supabaseAnonKey !== 'your_supabase_project_anon_key_here') {
   try {
     supabase = createClient(supabaseUrl, supabaseAnonKey);
-    console.log("Supabase Client: Successfully initialized REAL Supabase client.");
+    console.log("✅ Supabase Client: Successfully initialized REAL Supabase client.");
   } catch (error: any) {
-    const initErrorMessage = `Failed to initialize Supabase client: ${error.message}. This usually means the provided NEXT_PUBLIC_SUPABASE_URL is not a valid URL.`;
+    const initErrorMessage = `Failed to initialize Supabase client: ${error.message}. Check if NEXT_PUBLIC_SUPABASE_URL is a valid URL.`;
+    console.error("❌", initErrorMessage);
     supabase = createMockClient(initErrorMessage);
   }
 } else {
-  let missingVarsReason = 'Supabase URL or Anon Key is missing or empty in environment variables.';
-  if (!supabaseUrl || supabaseUrl.trim() === '') missingVarsReason += ' NEXT_PUBLIC_SUPABASE_URL is missing.';
-  if (!supabaseAnonKey || supabaseAnonKey.trim() === '') missingVarsReason += ' NEXT_PUBLIC_SUPABASE_ANON_KEY is missing.';
-  supabase = createMockClient(missingVarsReason + ' Please check your .env file or deployment environment variables.');
+  let missingVarsReason = '⚠️  Supabase credentials missing or using placeholder values.';
+  if (!supabaseUrl || supabaseUrl.trim() === '' || supabaseUrl === 'your_supabase_project_url_here') {
+    missingVarsReason += ' NEXT_PUBLIC_SUPABASE_URL needs to be set with actual value.';
+  }
+  if (!supabaseAnonKey || supabaseAnonKey.trim() === '' || supabaseAnonKey === 'your_supabase_project_anon_key_here') {
+    missingVarsReason += ' NEXT_PUBLIC_SUPABASE_ANON_KEY needs to be set with actual value.';
+  }
+  console.warn(missingVarsReason);
+  supabase = createMockClient(missingVarsReason + ' Using mock client for development.');
 }
 
 export { supabase };
