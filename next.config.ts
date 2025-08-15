@@ -1,5 +1,5 @@
 
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const securityHeaders = [
   {
@@ -8,7 +8,7 @@ const securityHeaders = [
   },
   {
     key: 'X-Frame-Options',
-    value: 'DENY', // Use 'SAMEORIGIN' if you need to embed this app in an iframe on the same domain
+    value: 'DENY',
   },
   {
     key: 'X-XSS-Protection',
@@ -18,16 +18,9 @@ const securityHeaders = [
     key: 'Referrer-Policy',
     value: 'strict-origin-when-cross-origin'
   }
-  // Content-Security-Policy is powerful but complex. Add carefully if needed.
-  // Example (very restrictive, would need detailed configuration):
-  // {
-  //   key: 'Content-Security-Policy',
-  //   value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://placehold.co; font-src 'self';"
-  // }
 ];
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -95,7 +88,6 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        // Apply these headers to all routes in your application.
         source: '/:path*',
         headers: securityHeaders,
       },

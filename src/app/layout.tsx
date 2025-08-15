@@ -11,12 +11,12 @@ import { GlobalStatusProvider } from '@/contexts/GlobalStatusContext';
 import { AIMediaAssetsProvider } from '@/contexts/AIMediaAssetsContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
   title: 'Maya Chat - Your AI Companion',
   description: 'Chat with Maya, your friendly AI companion from Mumbai',
-  keywords: 'AI chat, virtual companion, Maya, chatbot',
+  keywords: 'AI chat, virtual companion, Maya, chatbot, AI girlfriend, conversational AI',
   authors: [{ name: 'Maya Chat Team' }],
   viewport: 'width=device-width, initial-scale=1',
   robots: 'index, follow',
@@ -44,20 +44,20 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} antialiased bg-background text-foreground`}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased`}>
         <ErrorBoundary>
           <GlobalStatusProvider>
             <AdSettingsProvider>
               <AIProfileProvider>
                 <AIMediaAssetsProvider>
+                  <InstagramBrowserPrompt />
+                  <GlobalAdScripts />
                   <div className="min-h-screen bg-background">
-                    <InstagramBrowserPrompt />
-                    <GlobalAdScripts />
                     <main className="relative">
                       {children}
                     </main>
@@ -69,53 +69,6 @@ export default function RootLayout({
             </AdSettingsProvider>
           </GlobalStatusProvider>
         </ErrorBoundary>
-      </body>
-    </html>
-  );
-}
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-
-export const metadata: Metadata = {
-  title: 'Kruthika Chat - Your AI Companion',
-  description: 'Chat with Kruthika, your friendly and engaging AI companion. Experience a unique AI chat with Kruthika, sometimes referred to as an AI girlfriend experience for companionship.',
-  keywords: 'Kruthika, Kruthika Chat, AI Chat, AI girlfriend, virtual companion, chat bot, AI companion, conversational AI',
-  openGraph: {
-    title: 'Kruthika Chat - Your AI Companion',
-    description: 'Chat with Kruthika, your friendly and engaging AI companion. Experience a unique AI chat with Kruthika, sometimes referred to as an AI girlfriend experience for companionship.',
-    siteName: 'Kruthika Chat',
-    type: 'website',
-    // Add a placeholder image URL. Replace with your actual image URL.
-    // images: ['https://yourwebsite.com/og-image.jpg'],
-  },
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <InstagramBrowserPrompt />
-        <ErrorBoundary>
-          <AdSettingsProvider>
-            <AIProfileProvider>
-              <GlobalStatusProvider>
-                <AIMediaAssetsProvider>
-                  {/* Component for global ad scripts - now inside providers */}
-                  <GlobalAdScripts />
-                  {children}
-                  {/* Component to display social bar ads, present on all pages */}
-                  <SocialBarAdDisplay />
-                </AIMediaAssetsProvider>
-              </GlobalStatusProvider>
-            </AIProfileProvider>
-          </AdSettingsProvider>
-        </ErrorBoundary>
-        {/* Component for displaying toasts (notifications) globally */}
-        <Toaster />
       </body>
     </html>
   );
