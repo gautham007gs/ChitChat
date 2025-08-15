@@ -14,17 +14,19 @@ export interface Message {
 
 export interface AIProfile {
   name: string;
+  description: string;
+  personality: string;
   avatarUrl: string;
-  status: string; // Main status line for ChatHeader
-  statusStoryText?: string; // Text for the Status Page story
-  statusStoryImageUrl?: string; // Image URL for the Status Page story
-  statusStoryHasUpdate?: boolean; // Ring indicator for new story on Status Page
+  interests: string[];
+  responseStyle: string;
+  language: string;
+  customInstructions: string;
 }
 
 export interface AvatarOption {
   id: string;
+  name: string;
   url: string;
-  aiHint: string;
 }
 
 export interface AdminStatusDisplay {

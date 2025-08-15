@@ -92,7 +92,7 @@ export const managedContactStatus: ManagedContactStatus = {
   showCustomStatus: true,
 };
 
-// Export the admin status display settings with the expected name
+// Admin status display configuration
 export const defaultAdminStatusDisplay: AdminStatusDisplay = {
   id: "admin-status-001",
   name: "Admin",
@@ -102,7 +102,7 @@ export const defaultAdminStatusDisplay: AdminStatusDisplay = {
   statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
-// Export the managed demo contacts with the expected name  
+// Managed demo contacts configuration
 export const defaultManagedContactStatuses: ManagedContactStatus[] = [
   {
     id: "demo-contact-001",
