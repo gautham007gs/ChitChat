@@ -1,4 +1,3 @@
-
 import type { AIProfile, AvatarOption, AdminStatusDisplay, ManagedContactStatus, AdSettings, AIMediaAssetsConfig } from '@/types';
 
 // Cost-optimized configuration for Vertex AI Gemini
@@ -31,7 +30,7 @@ export function getCachedResponse(prompt: string): string | null {
 
 export function setCachedResponse(prompt: string, response: string): void {
   responseCache.set(prompt, { response, timestamp: Date.now() });
-  
+
   // Clean old cache entries to prevent memory bloat
   if (responseCache.size > 1000) {
     const entries = Array.from(responseCache.entries());
@@ -51,13 +50,13 @@ export const avatarOptions: AvatarOption[] = [
     url: "https://i.imghippo.com/files/LJlBm1736067488.png",
   },
   {
-    id: "maya2", 
+    id: "maya2",
     name: "Maya - Casual",
     url: "https://i.imghippo.com/files/xSVJr1736067554.png",
   },
   {
     id: "maya3",
-    name: "Maya - Artistic", 
+    name: "Maya - Artistic",
     url: "https://i.imghippo.com/files/OdYRR1736067647.png",
   }
 ];
@@ -96,9 +95,8 @@ export const managedContactStatus: ManagedContactStatus = {
 export const defaultAdminStatusDisplay: AdminStatusDisplay = {
   id: "admin-status-001",
   name: "Admin",
-  avatarUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
-  statusText: "Currently online and ready to help! 💬✨",
-  hasUpdate: true,
+  status: "Building something amazing! 🚀",
+  statusStoryText: "Hey everyone! I'm currently working on some exciting new features for our platform. Stay tuned for updates!",
   statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png"
 };
 
@@ -106,20 +104,27 @@ export const defaultAdminStatusDisplay: AdminStatusDisplay = {
 export const defaultManagedContactStatuses: ManagedContactStatus[] = [
   {
     id: "demo-contact-001",
-    name: "Sarah",
-    avatarUrl: "https://i.imghippo.com/files/xSVJr1736067554.png",
-    statusText: "Having a great day! ☀️",
-    hasUpdate: true,
-    dataAiHint: "friendly woman profile",
-    statusImageUrl: "https://i.imghippo.com/files/xSVJr1736067554.png"
+    name: "Demo User 1",
+    status: "Available for chat! 💬",
+    statusStoryText: "Just finished an amazing workout session! Feeling energized and ready to tackle the day.",
+    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    statusStoryHasUpdate: true
   },
   {
-    id: "demo-contact-002", 
-    name: "Alex",
-    avatarUrl: "https://i.imghippo.com/files/OdYRR1736067647.png",
-    statusText: "Working on exciting projects! 🚀",
-    hasUpdate: false,
-    dataAiHint: "professional person profile"
+    id: "demo-contact-002",
+    name: "Demo User 2",
+    status: "Working from home today 🏠",
+    statusStoryText: "Another productive day working remotely. Love the flexibility!",
+    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    statusStoryHasUpdate: false
+  },
+  {
+    id: "demo-contact-003",
+    name: "Demo User 3",
+    status: "Coffee break ☕",
+    statusStoryText: "Taking a well-deserved coffee break. The perfect fuel for creativity!",
+    statusImageUrl: "https://i.imghippo.com/files/LJlBm1736067488.png",
+    statusStoryHasUpdate: true
   }
 ];
 
@@ -139,7 +144,7 @@ export const defaultAdSettings: AdSettings = {
   adsterraSocialBarEnabled: true,
   adsterraPopunderCode: "<!-- Adsterra Popunder Code Placeholder -->",
   adsterraPopunderEnabled: false,
-  
+
   monetagDirectLink: DEFAULT_MONETAG_DIRECT_LINK,
   monetagDirectLinkEnabled: false,
   monetagBannerCode: "<!-- Monetag Banner Code Placeholder -->",
@@ -168,7 +173,7 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
       description: "Default message sent sound"
     },
     {
-      id: "default-received-sound", 
+      id: "default-received-sound",
       type: "audio",
       url: "/media/message-received.mp3",
       description: "Default message received sound"
@@ -176,8 +181,17 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
     {
       id: "default-bg-image",
       type: "image",
-      url: "/chat-bg.png", 
+      url: "/chat-bg.png",
       description: "Default chat background image"
     }
   ]
+};
+
+// Export all required items
+export {
+  defaultAIProfile,
+  defaultAdSettings,
+  defaultAIMediaAssetsConfig,
+  DEFAULT_ADSTERRA_DIRECT_LINK,
+  DEFAULT_MONETAG_DIRECT_LINK
 };

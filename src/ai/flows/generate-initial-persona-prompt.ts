@@ -38,7 +38,36 @@ export type GenerateInitialPersonaPromptOutput = z.infer<
 export async function generateInitialPersonaPrompt(
   input: GenerateInitialPersonaPromptInput
 ): Promise<GenerateInitialPersonaPromptOutput> {
-  return generateInitialPersonaPromptFlow(input);
+  try {
+    // Check if we have a valid AI configuration
+    const hasValidAI = process.env.GOOGLE_AI_STUDIO_API_KEY && process.env.GOOGLE_AI_STUDIO_API_KEY !== 'your_api_key_here';
+
+    if (!hasValidAI) {
+      // Return a fallback persona prompt when AI is not configured
+      return {
+        detailedPersonaPrompt: `You are ${input.personaDescription}, a friendly and engaging AI companion. You communicate naturally, mixing English and Hindi (Hinglish) as appropriate. You're warm, empathetic, and always ready to help with a conversation. You respond to emotions appropriately and maintain a consistent personality throughout conversations.`
+      };
+    }
+
+    const flow = defineFlow(
+      {
+        name: 'generateInitialPersonaPrompt',
+        inputSchema: GenerateInitialPersonaPromptInputSchema,
+        outputSchema: GenerateInitialPersonaPromptOutputSchema,
+      },
+      async (input) => {
+        const {output} = await generatePersonaPrompt(input);
+        return output!;
+      }
+    );
+    return flow(input);
+  } catch (error) {
+    console.error('Error generating initial persona prompt:', error);
+    // Fallback if an unexpected error occurs during flow execution
+    return {
+      detailedPersonaPrompt: `You are ${input.personaDescription}, a friendly and engaging AI companion. You communicate naturally, mixing English and Hindi (Hinglish) as appropriate. You're warm, empathetic, and always ready to help with a conversation. You respond to emotions appropriately and maintain a consistent personality throughout conversations.`
+    };
+  }
 }
 
 const generatePersonaPrompt = ai.definePrompt({

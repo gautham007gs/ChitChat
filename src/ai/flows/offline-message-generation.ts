@@ -1,4 +1,3 @@
-
 'use server';
 
 /**
@@ -29,9 +28,46 @@ const OfflineMessageOutputSchema = z.object({
 });
 export type OfflineMessageOutput = z.infer<typeof OfflineMessageOutputSchema>;
 
-export async function generateOfflineMessage(input: OfflineMessageInput): Promise<OfflineMessageOutput> {
-  return generateOfflineMessageFlow(input);
-}
+export const generateOfflineMessage = async (input: OfflineMessageInput): Promise<OfflineMessageOutput> => {
+  try {
+    // Check if we have a valid AI configuration
+    const hasValidAI = process.env.GOOGLE_AI_STUDIO_API_KEY && process.env.GOOGLE_AI_STUDIO_API_KEY !== 'your_api_key_here';
+
+    if (!hasValidAI) {
+      // Return a fallback offline message when AI is not configured
+      const fallbackMessages = [
+        "Hey! Miss me? 😄 I was just thinking about our last conversation!",
+        "Arrey! Where did you disappear? I was waiting for you to come back!",
+        "Psst... I'm back! Did you miss chatting with me? 🤗",
+        "Hello again! I hope you had a good break. Ready to chat?",
+        "I'm here! Thoda busy tha, but now I'm all yours for chatting! 💬"
+      ];
+
+      const randomMessage = fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)];
+
+      return {
+        message: randomMessage
+      };
+    }
+
+    const flow = defineFlow(
+      {
+        name: 'offlineMessageGeneration',
+        inputSchema: offlineMessageInputSchema,
+        outputSchema: offlineMessageOutputSchema,
+      },
+      async (input) => {
+        return (await offlineMessagePrompt(input)).output!;
+      }
+    );
+
+    return await flow(input);
+  } catch (error) {
+    console.error('Error generating offline message:', error);
+    // Fallback message in case of any unexpected error during generation
+    return { message: "Hey there! It's been a while. Hope to chat soon! 😉" };
+  }
+};
 
 const offlineMessagePrompt = ai.definePrompt({
   name: 'offlineMessagePromptKruthika', // Renamed for clarity
@@ -71,20 +107,6 @@ const offlineMessagePrompt = ai.definePrompt({
   Output only the message text.`,
 });
 
-const generateOfflineMessageFlow = ai.defineFlow(
-  {
-    name: 'generateOfflineMessageFlowKruthika', // Renamed for clarity
-    inputSchema: OfflineMessageInputSchema,
-    outputSchema: OfflineMessageOutputSchema,
-  },
-  async input => {
-    try {
-      const {output} = await offlineMessagePrompt(input);
-      return output!;
-    } catch (error) {
-      console.error('Error generating offline message:', error);
-      return { message: "Hey! Missed you! 😉" }; // Fallback message
-    }
-    return output!;
-  }
-);
+const defineFlow = ai.defineFlow;
+const offlineMessageInputSchema = OfflineMessageInputSchema;
+const offlineMessageOutputSchema = OfflineMessageOutputSchema;

@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react'; // Added useCallback
 import type { AdSettings } from '@/types';
 import { AD_SETTINGS_CONFIG_KEY } from '@/types'; // Corrected import path
 import { defaultAdSettings } from '@/config/ai'; // defaultAdSettings is still from config/ai
@@ -19,59 +18,41 @@ const AdSettingsContext = createContext<AdSettingsContextType | undefined>(undef
 
 export const AdSettingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [adSettings, setAdSettings] = useState<AdSettings | null>(null);
-  const [isLoadingAdSettings, setIsLoadingAdSettings] = useState(true);
+  const [isLoadingAdSettings, setIsLoadingAdSettings] = useState(true); // Renamed from isLoading to isLoadingAdSettings for clarity
 
-  const fetchAdSettings = async () => {
+  const fetchAdSettings = useCallback(async () => {
     setIsLoadingAdSettings(true);
-    if (!supabase) {
-      console.warn("Supabase client not available for fetching ad settings. Using defaults.");
-      setAdSettings(defaultAdSettings);
-      setIsLoadingAdSettings(false);
-      return;
-    }
-    
-    // --- Caching Logic ---
-    // Check for cached settings first
-    if (typeof window !== 'undefined') {
-      const cachedSettings = localStorage.getItem(CACHED_AD_SETTINGS_KEY);
-      if (cachedSettings) {
-        try {
-          setAdSettings(JSON.parse(cachedSettings) as AdSettings);
-        } catch (e) { console.error("Failed to parse cached ad settings", e); } // Handle potential parsing errors
-      }
-      // Note: The cache is read on mount for faster initial load.
-      // The latest settings are always fetched from Supabase afterward.
-      // Consider implementing a cache invalidation strategy (e.g., using versions or real-time updates)
-      // if immediate updates across active sessions are required.
-    }
-
     try {
+      // Check if Supabase is properly configured
+      if (!supabase || typeof supabase.from !== 'function') {
+        console.warn("Supabase not properly configured, using default ad settings.");
+        setAdSettings(defaultAdSettings);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('app_configurations')
         .select('settings')
-        .eq('id', AD_SETTINGS_CONFIG_KEY)
+        .eq('config_type', 'ad_settings') // Changed eq condition from 'id' to 'config_type'
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116: ' relazione «app_configurations» non trovata o nessuna riga corrisponde al filtro' (no rows found)
-        console.error('Error fetching ad settings from Supabase:', error);
-        setAdSettings(defaultAdSettings); // Fallback to defaults on error
-      } else if (data && data.settings) {
-        // Merge fetched settings with defaults to ensure all keys are present
-        // Ensure fetched settings override defaults where keys match.
-        const mergedSettings = { ...defaultAdSettings, ...(data.settings as Partial<AdSettings>) }; // Cast as Partial<AdSettings> for safety
-        localStorage.setItem(CACHED_AD_SETTINGS_KEY, JSON.stringify(mergedSettings)); // Cache the fetched settings
-        setAdSettings(mergedSettings);
+      if (error) {
+        console.error("Supabase error fetching ad settings:", error.message);
+        setAdSettings(defaultAdSettings);
+      } else if (data?.settings) {
+        const adSettingsData = data.settings as AdSettings;
+        setAdSettings(adSettingsData);
       } else {
-        // No settings found in Supabase, use defaults (admin might save them later)
+        console.warn("No ad settings data returned from Supabase, using default.");
         setAdSettings(defaultAdSettings);
       }
-    } catch (e) {
-      console.error('Unexpected error fetching ad settings:', e);
-      setAdSettings(defaultAdSettings); // Fallback to defaults
+    } catch (err) {
+      console.error("Unexpected error fetching ad settings:", err);
+      setAdSettings(defaultAdSettings);
     } finally {
       setIsLoadingAdSettings(false);
     }
-  };
+  }, []); // Added dependency array
 
   useEffect(() => {
     fetchAdSettings();

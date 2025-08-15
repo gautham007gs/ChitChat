@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -61,7 +60,7 @@ export const GlobalStatusProvider: React.FC<{ children: ReactNode }> = ({ childr
         .select('settings')
         .eq('id', MANAGED_DEMO_CONTACTS_CONFIG_KEY)
         .single();
-      
+
       if (demoContactsError && demoContactsError.code !== 'PGRST116') {
         console.error('Error fetching managed demo contacts from Supabase:', demoContactsError);
         toast({ title: "Error Loading Demo Contacts", description: `Could not load global demo contacts. Using defaults. ${demoContactsError.message}`, variant: "destructive" });

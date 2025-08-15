@@ -79,7 +79,6 @@ const CACHED_OFFLINE_MESSAGE_KEY = 'cached_offline_message_kruthika_chat';
 const USER_IMAGE_UPLOAD_COUNT_KEY_KRUTHIKA = 'user_image_upload_count_kruthika_v1';
 const USER_IMAGE_UPLOAD_LAST_DATE_KEY_KRUTHIKA = 'user_image_upload_last_date_kruthika_v1';
 const MAX_USER_IMAGES_PER_DAY = 5;
-const [cachedOfflineMessage, setCachedOfflineMessage] = useState<{ message: string, timestamp: number } | null>(null);
 
 
 
@@ -698,13 +697,13 @@ const KruthikaChatPage: NextPage = () => {
   useEffect(() => {
     if (!initialLoadComplete.current || isLoadingChatState || isLoadingAdSettings || isLoadingAIProfile || isLoadingMediaAssets) return;
 
-    const now = Date.now();
+    const currentTime = Date.now();
     const CACHE_FRESHNESS_WINDOW = 3600000; // 1 hour in milliseconds
 
-    if (cachedOfflineMessage && (now - cachedOfflineMessage.timestamp < CACHE_FRESHNESS_WINDOW)) {
+    if (cachedOfflineMessage && (currentTime - cachedOfflineMessage.timestamp < CACHE_FRESHNESS_WINDOW)) {
       // Use cached message if fresh
       const cachedMessage: Message = {
-        id: (now + Math.random()).toString(), // Give it a new ID
+        id: (currentTime + Math.random()).toString(), // Give it a new ID
         text: cachedOfflineMessage.message,
         sender: 'ai',
         timestamp: new Date(), // Use current time for display
@@ -718,8 +717,7 @@ const KruthikaChatPage: NextPage = () => {
 
     const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
     const lastInteractionTime = lastMessage ? new Date(lastMessage.timestamp).getTime() : 0;
-    const now = Date.now();
-    const timeSinceLastInteraction = now - lastInteractionTime;
+    const timeSinceLastInteraction = currentTime - lastInteractionTime;
     let timeoutId: NodeJS.Timeout | undefined = undefined;
 
     if (messages.some(m => m.sender === 'user') && lastMessage && lastMessage.sender === 'user' && timeSinceLastInteraction > 2 * 60 * 60 * 1000 && Math.random() < 0.3) { 
@@ -738,7 +736,7 @@ const KruthikaChatPage: NextPage = () => {
           const offlineResult = await generateOfflineMessage(offlineInput);
           const typingDelay = Math.min(Math.max(offlineResult.message.length * 60, 700), 3500);
           await new Promise(resolve => setTimeout(resolve, typingDelay));
-          const newOfflineMsgId = (Date.now() + Math.random()).toString();
+          const newOfflineMsgId = (currentTime + Math.random()).toString();
           const offlineMessage: Message = {
             id: newOfflineMsgId,
             text: offlineResult.message,
@@ -748,7 +746,7 @@ const KruthikaChatPage: NextPage = () => {
           };
           setMessages(prev => [...prev, offlineMessage]);
           // Cache the newly generated offline message
-      const newCachedMessage = { message: offlineResult.message, timestamp: Date.now() };
+      const newCachedMessage = { message: offlineResult.message, timestamp: currentTime };
       setCachedOfflineMessage(newCachedMessage);
       localStorage.setItem(CACHED_OFFLINE_MESSAGE_KEY, JSON.stringify(newCachedMessage));
       console.log("Generated and cached new offline message.");
