@@ -57,7 +57,6 @@ const FALLBACK_ERROR_MESSAGES: string[] = [
 ];
 
 
-
 // These constants will now be effectively overridden by AdSettings from context
 // const MAX_ADS_PER_DAY = 6;
 // const MAX_ADS_PER_SESSION = 3;
@@ -629,8 +628,8 @@ Reply as Maya would - short, sweet, and loving:`;
         timeOfDay: getTimeOfDay(),
         mood: aiMood,
         recentInteractions: updatedRecentInteractions,
-        hasAvailableImages: hasAvailableImages,
-        hasAvailableAudio: hasAvailableAudio,
+        hasAvailableImages: availableImages.length > 0,
+        hasAvailableAudio: availableAudio.length > 0,
         detailedPersonaPrompt: detailedPersonaPrompt,
       };
 
