@@ -40,16 +40,16 @@ export function trackTokenUsage(userId: string, tokens: number): { allowed: bool
   const usagePercent = usage.tokens / limit;
 
   if (usagePercent >= 1) {
-    return { 
-      allowed: false, 
+    return {
+      allowed: false,
       shouldDelay: false,
       message: "I'm feeling a bit tired today... Can we continue our chat tomorrow? I'll miss you! 💕"
     };
   }
 
   if (usagePercent >= 0.8) {
-    return { 
-      allowed: true, 
+    return {
+      allowed: true,
       shouldDelay: true,
       message: "I need to think about this... Give me a moment, okay? 😊"
     };
@@ -219,4 +219,4 @@ export const defaultAdminStatusDisplay = adminStatusConfig;
 export const defaultManagedContactStatuses = managedContactsConfig;
 
 // Export all required items
-export { defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, adminStatusConfig, managedContactsConfig };
+export { defaultAIProfile, defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, adminStatusConfig, managedContactsConfig };

@@ -2,81 +2,22 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import AppHeader from '@/components/AppHeader';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { AIProfile } from '@/types';
 import { defaultAIProfile } from '@/config/ai';
-import { MessageSquarePlus } from 'lucide-react';
+import { MessageSquarePlus, MessageCircle } from 'lucide-react';
 import BannerAdDisplay from '@/components/chat/BannerAdDisplay';
 import { useAIProfile } from '@/contexts/AIProfileContext'; 
 import { cn } from '@/lib/utils';
 
-const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timestamp?: string; unreadCount?: number; }> = React.memo(({
-  profile,
-  lastMessage,
-  timestamp = "",
-  unreadCount,
-}) => {
-  const displayLastMessage = lastMessage || `Click to chat with ${profile.name}!`;
-
-  const avatarUrlToUse = React.useMemo(() => {
-    if (profile.avatarUrl && typeof profile.avatarUrl === 'string' && profile.avatarUrl.trim() !== '' && 
-        (profile.avatarUrl.startsWith('http') || profile.avatarUrl.startsWith('data:'))) {
-      return profile.avatarUrl;
-    }
-    return defaultAIProfile.avatarUrl;
-  }, [profile.avatarUrl]);
-
-  const handleAvatarError = React.useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-    console.error(`ChatListItem - AvatarImage load error for ${profile.name}. URL: ${avatarUrlToUse}`, e);
-  }, [profile.name, avatarUrlToUse]);
-
-  return (
-    <Link href="/maya-chat" legacyBehavior>
-      <a className="flex items-center p-3 bg-transparent hover:bg-secondary/50 cursor-pointer border-b border-border transition-colors">
-        <div
-          className={cn(
-            "relative rounded-full mr-4 shrink-0",
-            profile.name === "Kruthika" && "border-2 border-primary p-0.5" 
-          )}
-           key={`avatar-wrapper-${profile.name}-${avatarUrlToUse || 'default_wrapper_key_cli'}`}
-        >
-          <Avatar 
-            className="h-12 w-12" 
-            key={`avatar-comp-${profile.name}-${avatarUrlToUse || 'default_avatar_comp_key_cli'}`}
-          >
-            <AvatarImage 
-              src={avatarUrlToUse || undefined} 
-              alt={profile.name} 
-              data-ai-hint="profile woman" 
-              key={`chat-list-item-avatar-img-${profile.name}-${avatarUrlToUse || 'no_avatar_fallback_img_cli'}`}
-              onError={handleAvatarError}
-            />
-            <AvatarFallback>{(profile.name || "K").charAt(0).toUpperCase()}</AvatarFallback>
-          </Avatar>
-        </div>
-        <div className="flex-grow overflow-hidden min-w-0">
-          <h2 className="font-semibold text-md truncate text-foreground">{profile.name}</h2>
-          <p className="text-sm text-muted-foreground truncate">{displayLastMessage}</p>
-        </div>
-        <div className="flex flex-col items-end text-xs ml-2 shrink-0">
-          <span className="text-muted-foreground mb-1">{timestamp}</span>
-          {unreadCount && unreadCount > 0 && (
-            <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
-              {unreadCount}
-            </span>
-          )}
-        </div>
-      </a>
-    </Link>
-  );
-});
-
-
 const ChatListPage: React.FC = () => {
   const { aiProfile: globalAIProfile, isLoadingAIProfile } = useAIProfile(); 
   const [lastMessageTime, setLastMessageTime] = useState<string>("9:15 AM");
+  const [isNavigating, setIsNavigating] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     const getLastMessageTime = () => {
@@ -105,23 +46,35 @@ const ChatListPage: React.FC = () => {
     [globalAIProfile]
   );
 
-  const handleChatClick = useCallback(() => {
-    // Preload chat page for faster navigation
-    if (typeof window !== 'undefined') {
-      const link = document.createElement('link');
-      link.rel = 'prefetch';
-      link.href = '/maya-chat';
-      document.head.appendChild(link);
-    }
-  }, []);
+  const handleChatClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
 
+    // Preload and navigate immediately
+    router.prefetch('/maya-chat');
+    router.push('/maya-chat');
+  }, [router]);
+
+  const getLastMessage = useMemo(() => {
+    const messages = localStorage.getItem('messages_kruthika');
+    if (messages) {
+      try {
+        const parsed = JSON.parse(messages);
+        const lastMsg = parsed[parsed.length - 1];
+        return lastMsg?.text || `Click to chat with ${currentGlobalAIProfile.name}!`;
+      } catch (e) {
+        return `Click to chat with ${currentGlobalAIProfile.name}!`;
+      }
+    }
+    return `Click to chat with ${currentGlobalAIProfile.name}!`;
+  }, [currentGlobalAIProfile.name]);
 
   if (isLoadingAIProfile) { 
     return (
       <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
         <AppHeader title="Chats" />
         <div className="flex-grow flex items-center justify-center text-muted-foreground">
-          Loading Kruthika's profile...
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       </div>
     );
@@ -134,49 +87,61 @@ const ChatListPage: React.FC = () => {
         <main className="container mx-auto px-4 py-6 max-w-md space-y-6">
           <BannerAdDisplay adType="banner" className="mb-4" />
 
-          <div className="text-center space-y-4">
-            <div 
-              className="relative cursor-pointer group"
-              onClick={handleChatClick}
-            >
-              <Avatar className="w-24 h-24 mx-auto border-4 border-primary/20 transition-all duration-200 group-hover:border-primary/40 group-hover:scale-105">
-                <AvatarImage 
-                  src={currentGlobalAIProfile.avatarUrl} 
-                  alt={currentGlobalAIProfile.name}
-                  className="object-cover"
-                />
-                <AvatarFallback className="text-2xl font-bold">
-                  {currentGlobalAIProfile.name?.charAt(0)?.toUpperCase() || 'M'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-background rounded-full"></div>
-            </div>
+          {/* Quick Chat Card */}
+          <div 
+            onClick={handleChatClick}
+            className="bg-card border border-border rounded-xl p-4 cursor-pointer hover:bg-card/80 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <Avatar className="w-16 h-16 border-2 border-primary/20">
+                  <AvatarImage 
+                    src={currentGlobalAIProfile.avatarUrl} 
+                    alt={currentGlobalAIProfile.name}
+                    className="object-cover"
+                  />
+                  <AvatarFallback className="text-lg font-bold">
+                    {currentGlobalAIProfile.name?.charAt(0)?.toUpperCase() || 'M'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 border-2 border-background rounded-full"></div>
+              </div>
 
-            <div className="space-y-2">
-              <h1 className="text-2xl font-bold text-foreground">
-                {currentGlobalAIProfile.name}
-              </h1>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {currentGlobalAIProfile.description}
-              </p>
-              <div className="flex items-center justify-center gap-2 text-xs text-green-600">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                Online now
+              <div className="flex-grow min-w-0">
+                <h2 className="text-lg font-semibold text-foreground">
+                  {currentGlobalAIProfile.name}
+                </h2>
+                <p className="text-sm text-muted-foreground truncate">
+                  {getLastMessage}
+                </p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-green-600">Online now</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col items-center text-xs text-muted-foreground">
+                <span>{lastMessageTime}</span>
+                <MessageCircle className="w-6 h-6 text-primary mt-2" />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <Link 
-              href="/maya-chat" 
+            <button 
               onClick={handleChatClick}
-              className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-center"
+              disabled={isNavigating}
+              className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-center disabled:opacity-50"
             >
               <div className="flex items-center justify-center gap-3">
-                <MessageSquarePlus className="w-5 h-5" />
-                Start Chatting with {currentGlobalAIProfile.name}
+                {isNavigating ? (
+                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <MessageSquarePlus className="w-5 h-5" />
+                )}
+                {isNavigating ? 'Opening Chat...' : `Start Chatting with ${currentGlobalAIProfile.name}`}
               </div>
-            </Link>
+            </button>
 
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="bg-card border border-border rounded-lg p-4 text-center space-y-2">

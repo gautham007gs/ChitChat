@@ -23,15 +23,16 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
   const fetchAIProfile = useCallback(async (force = false) => {
     if (isLoadingAIProfile && !force) return;
 
-    // Check cache first (5 minute cache)
+    // Check cache first (10 minute cache for better performance)
     const cachedData = localStorage.getItem('ai_profile_cache');
     const cacheTime = localStorage.getItem('ai_profile_cache_time');
     const now = Date.now();
 
-    if (!force && cachedData && cacheTime && now - parseInt(cacheTime) < 300000) {
+    if (!force && cachedData && cacheTime && now - parseInt(cacheTime) < 600000) {
       try {
         const cached = JSON.parse(cachedData);
         setAIProfile(cached);
+        setIsLoadingAIProfile(false);
         return;
       } catch (e) {
         localStorage.removeItem('ai_profile_cache');

@@ -1,5 +1,5 @@
+
 import type { NextConfig } from 'next';
-import path from 'path';
 
 const securityHeaders = [
   {
@@ -91,8 +91,9 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['@/components', '@/lib', '@/hooks'],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
+  webpack: (config, { isServer, dev }) => {
+    // Only apply optimizations in production
+    if (!dev && !isServer) {
       // Ensure splitChunks is properly configured
       if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
         config.optimization.splitChunks = {
@@ -102,12 +103,14 @@ const nextConfig: NextConfig = {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
+              priority: 10,
             },
             common: {
               name: 'common',
               minChunks: 2,
               chunks: 'all',
-              enforce: true,
+              priority: 5,
+              reuseExistingChunk: true,
             },
           },
         };
@@ -118,33 +121,21 @@ const nextConfig: NextConfig = {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
             chunks: 'all',
+            priority: 10,
           },
           common: {
             name: 'common',
             minChunks: 2,
             chunks: 'all',
-            enforce: true,
+            priority: 5,
+            reuseExistingChunk: true,
           },
         };
       }
-
-      // Performance optimizations
-      config.optimization.usedExports = true;
-      config.optimization.sideEffects = false;
     }
-
-    // Optimize bundle size
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, 'src'),
-    };
 
     return config;
   },
-  allowedDevOrigins: [
-    '*.replit.dev',
-    '*.repl.co'
-  ],
   async headers() {
     return [
       {
