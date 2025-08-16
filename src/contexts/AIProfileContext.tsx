@@ -19,10 +19,29 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
   const [aiProfile, setAIProfile] = useState<AIProfile | null>(null);
   const [isLoadingAIProfile, setIsLoadingAIProfile] = useState(true);
   const { toast } = useToast();
-  
-  const fetchAIProfile = useCallback(async () => {
-    console.log("[AIProfileContext] fetchAIProfile: Starting to fetch AI profile...");
+
+  const fetchAIProfile = useCallback(async (force = false) => {
+    if (isLoadingAIProfile && !force) return;
+
+    // Check cache first (5 minute cache)
+    const cachedData = localStorage.getItem('ai_profile_cache');
+    const cacheTime = localStorage.getItem('ai_profile_cache_time');
+    const now = Date.now();
+
+    if (!force && cachedData && cacheTime && now - parseInt(cacheTime) < 300000) {
+      try {
+        const cached = JSON.parse(cachedData);
+        setAIProfile(cached);
+        return;
+      } catch (e) {
+        localStorage.removeItem('ai_profile_cache');
+        localStorage.removeItem('ai_profile_cache_time');
+      }
+    }
+
     setIsLoadingAIProfile(true);
+    console.log('[AIProfileContext] fetchAIProfile: Starting to fetch AI profile...');
+
     try {
       // Check if Supabase is properly configured
       if (!supabase || typeof supabase.from !== 'function') {
@@ -65,7 +84,8 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
 
         // --- Caching Logic: Save to localStorage ---
         if (typeof window !== 'undefined') {
-          localStorage.setItem(CACHED_AI_PROFILE_KEY, JSON.stringify(mergedProfile));
+          localStorage.setItem('ai_profile_cache', JSON.stringify(mergedProfile));
+          localStorage.setItem('ai_profile_cache_time', String(Date.now()));
           console.log("[AIProfileContext] fetchAIProfile: Saved latest AI profile to cache.");
         }
         // --- End Caching Logic ---
@@ -136,7 +156,12 @@ export const AIProfileProvider: React.FC<{ children: ReactNode }> = ({ children 
       console.log("[AIProfileContext] updateAIProfile: AI Profile successfully saved to Supabase.");
       toast({ title: "AI Profile Saved!", description: "Kruthika's profile has been saved globally to Supabase." });
 
-      // Re-fetch after successful save to ensure UI reflects DB state, though optimistic update helps.
+      // Clear cache on update to ensure the latest data is fetched next time
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('ai_profile_cache');
+        localStorage.removeItem('ai_profile_cache_time');
+        console.log("[AIProfileContext] updateAIProfile: Cleared AI profile cache after successful update.");
+      }
 
     } catch (error: any) {
       console.error("[AIProfileContext] updateAIProfile: Unexpected error during Supabase save:", error);

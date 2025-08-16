@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import AppHeader from '@/components/AppHeader';
@@ -13,7 +13,7 @@ import BannerAdDisplay from '@/components/chat/BannerAdDisplay';
 import { useAIProfile } from '@/contexts/AIProfileContext'; 
 import { cn } from '@/lib/utils';
 
-const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timestamp?: string; unreadCount?: number; }> = ({
+const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timestamp?: string; unreadCount?: number; }> = React.memo(({
   profile,
   lastMessage,
   timestamp = "",
@@ -21,18 +21,17 @@ const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timesta
 }) => {
   const displayLastMessage = lastMessage || `Click to chat with ${profile.name}!`;
   
-  let avatarUrlToUse = profile.avatarUrl;
-  if (!avatarUrlToUse || typeof avatarUrlToUse !== 'string' || avatarUrlToUse.trim() === '' || (!avatarUrlToUse.startsWith('http') && !avatarUrlToUse.startsWith('data:'))) {
-    avatarUrlToUse = defaultAIProfile.avatarUrl;
-  }
+  const avatarUrlToUse = React.useMemo(() => {
+    if (profile.avatarUrl && typeof profile.avatarUrl === 'string' && profile.avatarUrl.trim() !== '' && 
+        (profile.avatarUrl.startsWith('http') || profile.avatarUrl.startsWith('data:'))) {
+      return profile.avatarUrl;
+    }
+    return defaultAIProfile.avatarUrl;
+  }, [profile.avatarUrl]);
 
-  // if (profile.name === "Kruthika") {
-    // console.log(`ChatListItem - Kruthika's final avatarUrlToUse: ${avatarUrlToUse}`);
-  // }
-
-  const handleAvatarError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  const handleAvatarError = React.useCallback((e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     console.error(`ChatListItem - AvatarImage load error for ${profile.name}. URL: ${avatarUrlToUse}`, e);
-  };
+  }, [profile.name, avatarUrlToUse]);
 
   return (
     <Link href="/maya-chat" legacyBehavior>
@@ -73,43 +72,36 @@ const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timesta
       </a>
     </Link>
   );
-};
+});
 
 
 const ChatListPage: React.FC = () => {
   const { aiProfile: globalAIProfile, isLoadingAIProfile } = useAIProfile(); 
-  const [lastMessageTime, setLastMessageTime] = useState<string | null>(null);
+  const [lastMessageTime, setLastMessageTime] = useState<string>("9:15 AM");
   
   useEffect(() => {
-    const lastInteraction = localStorage.getItem('messages_kruthika');
-    if (lastInteraction) {
-      try {
-        const messagesArray = JSON.parse(lastInteraction);
-        const lastMsg = messagesArray[messagesArray.length - 1];
-        if (lastMsg && lastMsg.timestamp) {
-          const date = new Date(lastMsg.timestamp);
-          const today = new Date();
-          if (date.toDateString() === today.toDateString()) {
-            setLastMessageTime(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }));
-          } else {
-             setLastMessageTime(date.toLocaleDateString([], { month: 'short', day: 'numeric' }));
+    const getLastMessageTime = () => {
+      const lastInteraction = localStorage.getItem('messages_kruthika');
+      if (lastInteraction) {
+        try {
+          const messagesArray = JSON.parse(lastInteraction);
+          const lastMsg = messagesArray[messagesArray.length - 1];
+          if (lastMsg?.timestamp) {
+            const date = new Date(lastMsg.timestamp);
+            const today = new Date();
+            return date.toDateString() === today.toDateString() 
+              ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+              : date.toLocaleDateString([], { month: 'short', day: 'numeric' });
           }
-        }
-      } catch (e) { console.warn("Could not parse last message time from localStorage", e); }
-    }
-    if (!lastMessageTime && Math.random() > 0.5) { 
-        setLastMessageTime("9:15 AM");
-    }
-  }, [lastMessageTime]); 
+        } catch (e) { console.warn("Could not parse last message time", e); }
+      }
+      return "9:15 AM";
+    };
+    
+    setLastMessageTime(getLastMessageTime());
+  }, []); 
 
-  const effectiveAIProfile = globalAIProfile || defaultAIProfile;
-  
-  // if (globalAIProfile) {
-    // console.log("[ChatListPage] Using AIProfile from context:", JSON.stringify(globalAIProfile, null, 2));
-  // } else if (!isLoadingAIProfile) { 
-    // console.log("[ChatListPage] AIProfile from context is null (and not loading), using defaultAIProfile:", JSON.stringify(defaultAIProfile, null, 2));
-  // }
-
+  const effectiveAIProfile = React.useMemo(() => globalAIProfile || defaultAIProfile, [globalAIProfile]);
 
   if (isLoadingAIProfile) { 
     return (

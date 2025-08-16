@@ -217,3 +217,5 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
 // Alternative names for backward compatibility (single source of truth)
 export const defaultAdminStatusDisplay = adminStatusConfig;
 export const defaultManagedContactStatuses = managedContactsConfig;
+
+export { defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, adminStatusConfig, managedContactsConfig };

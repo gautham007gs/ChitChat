@@ -27,24 +27,41 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       // Ensure splitChunks is properly configured
       if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
-        config.optimization.splitChunks = {};
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          minSize: 20000,
+          maxSize: 250000,
+        };
       }
       
       config.optimization.splitChunks.cacheGroups = {
         ...(config.optimization.splitChunks.cacheGroups || {}),
         default: false,
-        vendors: false,
-        // Prevent chunk loading issues
-        main: {
-          name: 'main',
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
           chunks: 'all',
-          enforce: true,
+          priority: 10,
+        },
+        common: {
+          name: 'common',
+          minChunks: 2,
+          chunks: 'all',
+          priority: 5,
+          reuseExistingChunk: true,
         },
       };
+      
+      // Optimize for development
+      if (dev) {
+        config.optimization.removeAvailableModules = false;
+        config.optimization.removeEmptyChunks = false;
+        config.optimization.splitChunks = false;
+      }
     }
     return config;
   },
