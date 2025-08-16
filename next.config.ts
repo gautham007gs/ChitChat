@@ -88,22 +88,36 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    optimizeCss: true,
     optimizePackageImports: ['@/components', '@/lib', '@/hooks'],
   },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   webpack: (config, { isServer, dev }) => {
-    // Only apply optimizations in production
+    // Performance optimizations
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': require('path').resolve('./src'),
+    };
+
+    // Only in production and client-side
     if (!dev && !isServer) {
-      // Ensure splitChunks is properly configured
-      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
-        config.optimization.splitChunks = {
+      // Remove conflicting optimizations
+      delete config.optimization.usedExports;
+      
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
           chunks: 'all',
+          minSize: 20000,
+          maxSize: 244000,
           cacheGroups: {
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
               priority: 10,
+              reuseExistingChunk: true,
             },
             common: {
               name: 'common',
@@ -113,25 +127,10 @@ const nextConfig: NextConfig = {
               reuseExistingChunk: true,
             },
           },
-        };
-      } else {
-        config.optimization.splitChunks.cacheGroups = {
-          ...(config.optimization.splitChunks.cacheGroups || {}),
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-            priority: 10,
-          },
-          common: {
-            name: 'common',
-            minChunks: 2,
-            chunks: 'all',
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        };
-      }
+        },
+        moduleIds: 'deterministic',
+        chunkIds: 'deterministic',
+      };
     }
 
     return config;
@@ -144,6 +143,9 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  swcMinify: true,
+  poweredByHeader: false,
+  compress: true,
 };
 
 export default nextConfig;
