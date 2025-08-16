@@ -93,6 +93,9 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  devIndicators: {
+    buildActivity: false, // Disable build activity indicator for better performance
+  },
   webpack: (config, { isServer, dev }) => {
     // Performance optimizations
     config.resolve.alias = {
@@ -100,36 +103,38 @@ const nextConfig: NextConfig = {
       '@': require('path').resolve('./src'),
     };
 
-    // Only in production and client-side
-    if (!dev && !isServer) {
-      // Remove conflicting optimizations
-      delete config.optimization.usedExports;
-      
+    // Optimize for faster builds
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+      };
+    }
+
+    // Simple optimization for development speed
+    if (dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: false,
+      };
+    } else {
+      // Production optimizations
       config.optimization = {
         ...config.optimization,
         splitChunks: {
           chunks: 'all',
-          minSize: 20000,
-          maxSize: 244000,
           cacheGroups: {
+            default: false,
+            vendors: false,
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               chunks: 'all',
               priority: 10,
-              reuseExistingChunk: true,
-            },
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 5,
-              reuseExistingChunk: true,
             },
           },
         },
-        moduleIds: 'deterministic',
-        chunkIds: 'deterministic',
       };
     }
 
@@ -143,7 +148,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  swcMinify: true,
   poweredByHeader: false,
   compress: true,
 };

@@ -46,14 +46,21 @@ const ChatListPage: React.FC = () => {
     [globalAIProfile]
   );
 
-  const handleChatClick = useCallback((e: React.MouseEvent) => {
+  const handleChatClick = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
+    
+    if (isNavigating) return; // Prevent double clicks
+    
     setIsNavigating(true);
 
-    // Preload and navigate immediately
-    router.prefetch('/maya-chat');
-    router.push('/maya-chat');
-  }, [router]);
+    try {
+      // Navigate immediately without preloading for speed
+      await router.push('/maya-chat');
+    } catch (error) {
+      console.error('Navigation error:', error);
+      setIsNavigating(false);
+    }
+  }, [router, isNavigating]);
 
   const getLastMessage = useMemo(() => {
     const messages = localStorage.getItem('messages_kruthika');
