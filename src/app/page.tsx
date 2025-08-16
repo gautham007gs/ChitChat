@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -20,7 +19,7 @@ const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timesta
   unreadCount,
 }) => {
   const displayLastMessage = lastMessage || `Click to chat with ${profile.name}!`;
-  
+
   const avatarUrlToUse = React.useMemo(() => {
     if (profile.avatarUrl && typeof profile.avatarUrl === 'string' && profile.avatarUrl.trim() !== '' && 
         (profile.avatarUrl.startsWith('http') || profile.avatarUrl.startsWith('data:'))) {
@@ -78,7 +77,7 @@ const ChatListItem: React.FC<{ profile: AIProfile; lastMessage?: string; timesta
 const ChatListPage: React.FC = () => {
   const { aiProfile: globalAIProfile, isLoadingAIProfile } = useAIProfile(); 
   const [lastMessageTime, setLastMessageTime] = useState<string>("9:15 AM");
-  
+
   useEffect(() => {
     const getLastMessageTime = () => {
       const lastInteraction = localStorage.getItem('messages_kruthika');
@@ -97,11 +96,25 @@ const ChatListPage: React.FC = () => {
       }
       return "9:15 AM";
     };
-    
+
     setLastMessageTime(getLastMessageTime());
   }, []); 
 
-  const effectiveAIProfile = React.useMemo(() => globalAIProfile || defaultAIProfile, [globalAIProfile]);
+  const currentGlobalAIProfile = useMemo(() => 
+    globalAIProfile || defaultAIProfile, 
+    [globalAIProfile]
+  );
+
+  const handleChatClick = useCallback(() => {
+    // Preload chat page for faster navigation
+    if (typeof window !== 'undefined') {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.href = '/maya-chat';
+      document.head.appendChild(link);
+    }
+  }, []);
+
 
   if (isLoadingAIProfile) { 
     return (
@@ -113,37 +126,86 @@ const ChatListPage: React.FC = () => {
       </div>
     );
   }
-  
+
   return (
-    <div className="flex flex-col h-screen max-w-3xl mx-auto bg-background shadow-2xl">
-      <AppHeader title="Chats" />
-      <div className="flex-grow overflow-y-auto custom-scrollbar relative">
-        <ChatListItem
-          profile={effectiveAIProfile} 
-          lastMessage={effectiveAIProfile.status || `Let's chat! 😊`}
-          timestamp={lastMessageTime || ""}
-        />
-        
-        <BannerAdDisplay adType="standard" placementKey="chatListBottom" className="mx-auto max-w-md mt-2 mb-1" />
-        
-        <div className="p-2">
-             <BannerAdDisplay adType="native" placementKey="chatListNative" className="my-2" />
-        </div>
+    <>
+      <div className="min-h-screen bg-background text-foreground">
+        <AppHeader />
+        <main className="container mx-auto px-4 py-6 max-w-md space-y-6">
+          <BannerAdDisplay adType="banner" className="mb-4" />
+
+          <div className="text-center space-y-4">
+            <div 
+              className="relative cursor-pointer group"
+              onClick={handleChatClick}
+            >
+              <Avatar className="w-24 h-24 mx-auto border-4 border-primary/20 transition-all duration-200 group-hover:border-primary/40 group-hover:scale-105">
+                <AvatarImage 
+                  src={currentGlobalAIProfile.avatarUrl} 
+                  alt={currentGlobalAIProfile.name}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-2xl font-bold">
+                  {currentGlobalAIProfile.name?.charAt(0)?.toUpperCase() || 'M'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-background rounded-full"></div>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-foreground">
+                {currentGlobalAIProfile.name}
+              </h1>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                {currentGlobalAIProfile.description}
+              </p>
+              <div className="flex items-center justify-center gap-2 text-xs text-green-600">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                Online now
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <Link 
+              href="/maya-chat" 
+              onClick={handleChatClick}
+              className="block w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-4 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl text-center"
+            >
+              <div className="flex items-center justify-center gap-3">
+                <MessageSquarePlus className="w-5 h-5" />
+                Start Chatting with {currentGlobalAIProfile.name}
+              </div>
+            </Link>
+
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="bg-card border border-border rounded-lg p-4 text-center space-y-2">
+                <h3 className="font-semibold text-foreground">Interests</h3>
+                <div className="flex flex-wrap gap-1 justify-center">
+                  {currentGlobalAIProfile.interests?.slice(0, 3).map((interest, index) => (
+                    <span 
+                      key={index}
+                      className="bg-primary/10 text-primary px-2 py-1 rounded-md text-xs"
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-card border border-border rounded-lg p-4 text-center space-y-2">
+                <h3 className="font-semibold text-foreground">Language</h3>
+                <p className="text-muted-foreground text-xs">
+                  {currentGlobalAIProfile.language || 'English'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <BannerAdDisplay adType="native-banner" className="mt-6" />
+        </main>
       </div>
-      <Link
-        href="/maya-chat"
-        aria-label={`New chat with ${effectiveAIProfile.name}`}
-        className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 lg:bottom-10 lg:right-10 z-10 bg-primary text-primary-foreground p-4 rounded-full shadow-lg hover:bg-primary/90 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-      >
-        <span>
-          <MessageSquarePlus size={24} />
-        </span>
-      </Link>
-      <footer className="p-2 text-center border-t border-border">
-        
-        <p className="text-xs text-muted-foreground/70 mt-1">AI Chat Experience.</p>
-      </footer>
-    </div>
+    </>
   );
 };
 

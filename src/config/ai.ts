@@ -218,4 +218,5 @@ export const defaultAIMediaAssetsConfig: AIMediaAssetsConfig = {
 export const defaultAdminStatusDisplay = adminStatusConfig;
 export const defaultManagedContactStatuses = managedContactsConfig;
 
-export { defaultAdSettings, defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, adminStatusConfig, managedContactsConfig };
+// Export all required items
+export { defaultAIMediaAssetsConfig, DEFAULT_ADSTERRA_DIRECT_LINK, DEFAULT_MONETAG_DIRECT_LINK, adminStatusConfig, managedContactsConfig };

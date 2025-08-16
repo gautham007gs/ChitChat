@@ -1,4 +1,5 @@
 import type { NextConfig } from 'next';
+import path from 'path';
 
 const securityHeaders = [
   {
@@ -20,66 +21,19 @@ const securityHeaders = [
 ];
 
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  webpack: (config, { isServer, dev }) => {
-    if (!isServer) {
-      // Ensure splitChunks is properly configured
-      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
-        config.optimization.splitChunks = {
-          chunks: 'all',
-          minSize: 20000,
-          maxSize: 250000,
-        };
-      }
-      
-      config.optimization.splitChunks.cacheGroups = {
-        ...(config.optimization.splitChunks.cacheGroups || {}),
-        default: false,
-        vendors: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-          priority: 10,
-        },
-        common: {
-          name: 'common',
-          minChunks: 2,
-          chunks: 'all',
-          priority: 5,
-          reuseExistingChunk: true,
-        },
-      };
-      
-      // Optimize for development
-      if (dev) {
-        config.optimization.removeAvailableModules = false;
-        config.optimization.removeEmptyChunks = false;
-        config.optimization.splitChunks = false;
-      }
-    }
-    return config;
-  },
-  allowedDevOrigins: [
-    '*.replit.dev',
-    '*.repl.co'
-  ],
+const nextConfig: NextConfig = {
   images: {
+    domains: ['i.imghippo.com'],
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
+        hostname: 'i.imghippo.com',
         port: '',
-        pathname: '/**',
+        pathname: '/files/**',
       },
       {
         protocol: 'https',
-        hostname: 'i.imghippo.com',
+        hostname: 'placehold.co',
         port: '',
         pathname: '/**',
       },
@@ -127,6 +81,70 @@ const nextConfig = {
       },
     ],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['@/components', '@/lib', '@/hooks'],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Ensure splitChunks is properly configured
+      if (!config.optimization.splitChunks || config.optimization.splitChunks === false) {
+        config.optimization.splitChunks = {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              enforce: true,
+            },
+          },
+        };
+      } else {
+        config.optimization.splitChunks.cacheGroups = {
+          ...(config.optimization.splitChunks.cacheGroups || {}),
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        };
+      }
+
+      // Performance optimizations
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+    }
+
+    // Optimize bundle size
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+    };
+
+    return config;
+  },
+  allowedDevOrigins: [
+    '*.replit.dev',
+    '*.repl.co'
+  ],
   async headers() {
     return [
       {
